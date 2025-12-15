@@ -45,4 +45,14 @@ next-env.d.ts
 
 # OS
 .DS_Store
-Thumbs.dbyarn.lock
+Thumbs.db
+
+# yarn
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
+.yarnrc.yml
