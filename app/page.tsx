@@ -39,14 +39,14 @@ export default function HomePage() {
             {/* Top-Right CTA Button */}
             <a
               href={PHONE_LINK}
-              className="cta-button text-sm md:text-base px-4 py-2 md:px-6 md:py-3"
+              className="inline-flex items-center justify-center gap-2 bg-[#F97316] text-white px-3 py-2 md:px-6 md:py-3 rounded-lg font-semibold text-sm md:text-base hover:bg-[#EA580C] transition-all shadow-md hover:shadow-lg whitespace-nowrap"
               aria-label="Call NeighborCoverage now at (866) 649-9062"
               onClick={() => trackCTAClick('header_top_right')}
               // TODO: Add Meta Pixel Contact event when Meta Pixel is configured
             >
-              <Phone className="h-4 w-4 md:h-5 md:w-5" />
-              <span className="hidden sm:inline">Call Now: {PHONE_NUMBER}</span>
-              <span className="sm:hidden">Call Now</span>
+              <Phone className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
+              <span className="hidden md:inline">Call Now: {PHONE_NUMBER}</span>
+              <span className="md:hidden">Call</span>
             </a>
           </div>
         </div>
@@ -76,13 +76,16 @@ export default function HomePage() {
               {/* Primary CTA Button - LARGE & PROMINENT */}
               <a
                 href={PHONE_LINK}
-                className="cta-button text-lg md:text-xl px-8 py-5 shadow-2xl hover:shadow-3xl transform hover:scale-105"
+                className="inline-flex flex-col md:flex-row items-center justify-center gap-2 md:gap-3 bg-[#F97316] text-white px-8 py-5 rounded-lg font-bold text-lg md:text-xl hover:bg-[#EA580C] transition-all shadow-2xl hover:shadow-3xl transform hover:scale-105 w-full md:w-auto"
                 aria-label="Call NeighborCoverage now at (866) 649-9062"
                 onClick={() => trackCTAClick('hero_section')}
                 // TODO: Add Meta Pixel Contact event when Meta Pixel is configured
               >
-                <Phone className="h-7 w-7" />
-                <span className="font-bold">Call Now: {PHONE_NUMBER}</span>
+                <div className="flex items-center gap-2">
+                  <Phone className="h-6 w-6 md:h-7 md:w-7 flex-shrink-0" />
+                  <span>Call Now:</span>
+                </div>
+                <span className="whitespace-nowrap">{PHONE_NUMBER}</span>
               </a>
 
               {/* Secondary text under CTA */}
@@ -194,13 +197,16 @@ export default function HomePage() {
             {/* HUGE CTA BUTTON */}
             <a
               href={PHONE_LINK}
-              className="inline-flex items-center gap-4 bg-white text-[#F97316] px-12 py-6 rounded-2xl font-bold text-2xl md:text-3xl hover:bg-gray-50 transition-all duration-300 shadow-2xl hover:shadow-3xl transform hover:scale-105"
+              className="inline-flex flex-col md:flex-row items-center justify-center gap-3 md:gap-4 bg-white text-[#F97316] px-8 md:px-12 py-6 rounded-2xl font-bold text-xl md:text-3xl hover:bg-gray-50 transition-all duration-300 shadow-2xl hover:shadow-3xl transform hover:scale-105 w-full max-w-md md:w-auto"
               aria-label="Call NeighborCoverage now at (866) 649-9062"
               onClick={() => trackCTAClick('middle_cta_section')}
               // TODO: Add Meta Pixel Contact event when Meta Pixel is configured
             >
-              <Phone className="h-10 w-10 animate-pulse" />
-              <span>CALL NOW: {PHONE_NUMBER}</span>
+              <div className="flex items-center gap-3">
+                <Phone className="h-8 w-8 md:h-10 md:w-10 animate-pulse flex-shrink-0" />
+                <span>CALL NOW:</span>
+              </div>
+              <span className="whitespace-nowrap text-2xl md:text-3xl">{PHONE_NUMBER}</span>
             </a>
             
             <div className="flex flex-wrap justify-center gap-8 pt-8 text-white">
@@ -327,13 +333,16 @@ export default function HomePage() {
           {/* Bottom CTA Button */}
           <a
             href={PHONE_LINK}
-            className="cta-button inline-flex text-xl px-10 py-5 shadow-2xl hover:shadow-3xl transform hover:scale-105"
+            className="inline-flex flex-col md:flex-row items-center justify-center gap-2 md:gap-3 bg-[#F97316] text-white px-8 md:px-10 py-5 rounded-lg font-bold text-lg md:text-xl hover:bg-[#EA580C] transition-all shadow-2xl hover:shadow-3xl transform hover:scale-105 w-full max-w-md md:w-auto"
             aria-label="Call NeighborCoverage at (866) 649-9062"
             onClick={() => trackCTAClick('bottom_cta_section')}
             // TODO: Add Meta Pixel Contact event when Meta Pixel is configured
           >
-            <Phone className="h-7 w-7" />
-            <span className="font-bold">Call Now: {PHONE_NUMBER}</span>
+            <div className="flex items-center gap-2">
+              <Phone className="h-6 w-6 md:h-7 md:w-7 flex-shrink-0" />
+              <span>Call Now:</span>
+            </div>
+            <span className="whitespace-nowrap">{PHONE_NUMBER}</span>
           </a>
           
           <p className="text-blue-200 text-sm italic">
