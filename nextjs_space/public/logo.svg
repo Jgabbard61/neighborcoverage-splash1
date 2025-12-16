@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120" width="400" height="120">
+  <!-- Shield with checkmark -->
+  <g id="logo-icon">
+    <!-- Shield outline -->
+    <path d="M 50 20 L 80 20 C 82 20 84 22 84 24 L 84 50 C 84 65 75 75 65 85 C 55 75 46 65 46 50 L 46 24 C 46 22 48 20 50 20 Z" 
+          fill="#1E3A8A" stroke="#1E3A8A" stroke-width="2"/>
+    
+    <!-- Checkmark -->
+    <path d="M 56 52 L 62 58 L 74 40" 
+          fill="none" stroke="#F97316" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  
+  <!-- Company name -->
+  <text x="100" y="55" font-family="'Inter', 'Poppins', 'Arial', sans-serif" font-size="28" font-weight="700" fill="#1E3A8A">
+    Insurance Advisor
+  </text>
+  
+  <!-- Tagline (optional, smaller) -->
+  <text x="100" y="75" font-family="'Inter', 'Poppins', 'Arial', sans-serif" font-size="12" font-weight="400" fill="#64748B">
+    Connecting You with Licensed Professionals
+  </text>
+</svg>
