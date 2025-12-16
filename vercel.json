@@ -1,0 +1,5 @@
+{
+  "buildCommand": "cd nextjs_space && npm install && npm run build",
+  "outputDirectory": "nextjs_space/.next",
+  "installCommand": "cd nextjs_space && npm install"
+}
