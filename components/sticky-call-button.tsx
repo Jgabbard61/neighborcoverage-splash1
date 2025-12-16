@@ -31,13 +31,23 @@ export default function StickyCallButton({ phoneNumber, phoneLink }: StickyCallB
   // GA4 Event Tracking for Sticky Mobile Button
   const trackStickyButtonClick = () => {
     if (typeof window !== 'undefined' && (window as any).gtag) {
+      // Track CTA click
       (window as any).gtag('event', 'cta_click', {
         event_category: 'engagement',
         event_label: 'sticky_mobile_button',
         offer_type: 'auto_insurance',
         phone_number: phoneNumber,
       })
+      // Track call initiated
+      (window as any).gtag('event', 'call_initiated', {
+        event_category: 'conversion',
+        event_label: 'sticky_mobile_button',
+        offer_type: 'auto_insurance',
+        phone_number: phoneNumber,
+        value: 1,
+      })
     }
+    // TODO: Add Meta Pixel Contact + Lead events when Meta Pixel is configured
   }
 
   return (

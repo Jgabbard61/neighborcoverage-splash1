@@ -7,7 +7,7 @@ import StickyCallButton from '@/components/sticky-call-button'
 const PHONE_NUMBER = '(866) 649-9062'
 const PHONE_LINK = 'tel:8666499062'
 
-// GA4 Event Tracking Function
+// GA4 Event Tracking Functions
 const trackCTAClick = (location: string) => {
   if (typeof window !== 'undefined' && (window as any).gtag) {
     (window as any).gtag('event', 'cta_click', {
@@ -17,6 +17,19 @@ const trackCTAClick = (location: string) => {
       phone_number: PHONE_NUMBER,
     })
   }
+}
+
+const trackCallInitiated = (location: string) => {
+  if (typeof window !== 'undefined' && (window as any).gtag) {
+    (window as any).gtag('event', 'call_initiated', {
+      event_category: 'conversion',
+      event_label: location,
+      offer_type: 'auto_insurance',
+      phone_number: PHONE_NUMBER,
+      value: 1, // Can adjust based on lead value
+    })
+  }
+  // TODO: Add Meta Pixel 'Lead' event here when Pixel ID is configured
 }
 
 export default function HomePage() {
@@ -41,8 +54,11 @@ export default function HomePage() {
               href={PHONE_LINK}
               className="inline-flex items-center justify-center gap-1.5 md:gap-2 bg-[#F97316] text-white px-3 py-2.5 md:px-6 md:py-3 rounded-full font-semibold text-xs md:text-base hover:bg-[#EA580C] transition-all shadow-md hover:shadow-lg"
               aria-label="Call NeighborCoverage now at (866) 649-9062"
-              onClick={() => trackCTAClick('header_top_right')}
-              // TODO: Add Meta Pixel Contact event when Meta Pixel is configured
+              onClick={() => {
+                trackCTAClick('header_top_right')
+                trackCallInitiated('header_top_right')
+              }}
+              // TODO: Add Meta Pixel Contact + Lead events when Meta Pixel is configured
             >
               <Phone className="h-3.5 w-3.5 md:h-5 md:w-5 flex-shrink-0" />
               <span className="whitespace-nowrap">Call Now: {PHONE_NUMBER}</span>
@@ -77,8 +93,11 @@ export default function HomePage() {
                 href={PHONE_LINK}
                 className="inline-flex flex-col md:flex-row items-center justify-center gap-2 md:gap-3 bg-[#F97316] text-white px-8 py-5 rounded-full font-bold text-lg md:text-xl hover:bg-[#EA580C] transition-all shadow-2xl hover:shadow-3xl transform hover:scale-105 w-full md:w-auto"
                 aria-label="Call NeighborCoverage now at (866) 649-9062"
-                onClick={() => trackCTAClick('hero_section')}
-                // TODO: Add Meta Pixel Contact event when Meta Pixel is configured
+                onClick={() => {
+                  trackCTAClick('hero_section')
+                  trackCallInitiated('hero_section')
+                }}
+                // TODO: Add Meta Pixel Contact + Lead events when Meta Pixel is configured
               >
                 <div className="flex items-center gap-2">
                   <Phone className="h-6 w-6 md:h-7 md:w-7 flex-shrink-0" />
@@ -198,8 +217,11 @@ export default function HomePage() {
               href={PHONE_LINK}
               className="inline-flex flex-col md:flex-row items-center justify-center gap-3 md:gap-4 bg-white text-[#F97316] px-8 md:px-12 py-6 rounded-full font-bold text-xl md:text-3xl hover:bg-gray-50 transition-all duration-300 shadow-2xl hover:shadow-3xl transform hover:scale-105 w-full max-w-md md:w-auto"
               aria-label="Call NeighborCoverage now at (866) 649-9062"
-              onClick={() => trackCTAClick('middle_cta_section')}
-              // TODO: Add Meta Pixel Contact event when Meta Pixel is configured
+              onClick={() => {
+                trackCTAClick('middle_cta_section')
+                trackCallInitiated('middle_cta_section')
+              }}
+              // TODO: Add Meta Pixel Contact + Lead events when Meta Pixel is configured
             >
               <div className="flex items-center gap-3">
                 <Phone className="h-8 w-8 md:h-10 md:w-10 animate-pulse flex-shrink-0" />
@@ -334,8 +356,11 @@ export default function HomePage() {
             href={PHONE_LINK}
             className="inline-flex flex-col md:flex-row items-center justify-center gap-2 md:gap-3 bg-[#F97316] text-white px-8 md:px-10 py-5 rounded-full font-bold text-lg md:text-xl hover:bg-[#EA580C] transition-all shadow-2xl hover:shadow-3xl transform hover:scale-105 w-full max-w-md md:w-auto"
             aria-label="Call NeighborCoverage at (866) 649-9062"
-            onClick={() => trackCTAClick('bottom_cta_section')}
-            // TODO: Add Meta Pixel Contact event when Meta Pixel is configured
+            onClick={() => {
+              trackCTAClick('bottom_cta_section')
+              trackCallInitiated('bottom_cta_section')
+            }}
+            // TODO: Add Meta Pixel Contact + Lead events when Meta Pixel is configured
           >
             <div className="flex items-center gap-2">
               <Phone className="h-6 w-6 md:h-7 md:w-7 flex-shrink-0" />
