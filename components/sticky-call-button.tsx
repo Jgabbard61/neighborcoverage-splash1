@@ -28,8 +28,9 @@ export default function StickyCallButton({ phoneNumber, phoneLink }: StickyCallB
     return () => window?.removeEventListener?.('scroll', handleScroll)
   }, [])
 
-  // GA4 Event Tracking for Sticky Mobile Button
+  // GA4 + Meta Pixel Event Tracking for Sticky Mobile Button
   const trackStickyButtonClick = () => {
+    // GA4 Events
     if (typeof window !== 'undefined' && (window as any).gtag) {
       // Track CTA click
       (window as any).gtag('event', 'cta_click', {
@@ -47,7 +48,44 @@ export default function StickyCallButton({ phoneNumber, phoneLink }: StickyCallB
         value: 1,
       })
     }
-    // TODO: Add Meta Pixel Contact + Lead events when Meta Pixel is configured
+    
+    // Meta Pixel Events
+    if (typeof window !== 'undefined' && (window as any).fbq) {
+      // Contact Event
+      (window as any).fbq('track', 'Contact', {
+        content_name: 'Auto Insurance CTA',
+        content_category: 'auto_insurance',
+        value: 0.50,
+        currency: 'USD'
+      })
+      // Lead Event
+      (window as any).fbq('track', 'Lead', {
+        content_name: 'Phone Call Initiated',
+        content_category: 'auto_insurance',
+        value: 1.00,
+        currency: 'USD'
+      })
+    }
+    
+    // Send to Conversion API (server-side tracking)
+    if (typeof window !== 'undefined') {
+      fetch('/api/meta-conversion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event_name: 'Lead',
+          event_source_url: window.location.href,
+          custom_data: {
+            content_name: 'Phone Call Initiated',
+            content_category: 'auto_insurance',
+            cta_location: 'sticky_mobile_button',
+            phone_number: phoneNumber,
+            value: 1.00,
+            currency: 'USD'
+          }
+        })
+      }).catch(err => console.error('Conversion API error:', err))
+    }
   }
 
   return (

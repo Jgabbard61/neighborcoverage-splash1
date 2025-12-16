@@ -30,13 +30,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* TODO Phase 1B: Add Meta Pixel base code here */}
-        {/* INSTRUCTIONS: Once you have your Meta Pixel ID from Facebook Business Manager:
-        1. Replace 'YOUR_PIXEL_ID' below with your actual Pixel ID
-        2. Uncomment the script block
-        3. The pixel will automatically track PageView events
-        
-        Example Meta Pixel Code:
+        {/* Meta Pixel - Event Tracking */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -48,12 +42,19 @@ export default function RootLayout({
               t.src=v;s=b.getElementsByTagName(e)[0];
               s.parentNode.insertBefore(t,s)}(window, document,'script',
               'https://connect.facebook.net/en_US/fbevents.js');
-              fbq('init', 'YOUR_PIXEL_ID');
+              fbq('init', '1884617578809782');
               fbq('track', 'PageView');
             `,
           }}
         />
-        */}
+        <noscript>
+          <img
+            height="1"
+            width="1"
+            style={{ display: 'none' }}
+            src="https://www.facebook.com/tr?id=1884617578809782&ev=PageView&noscript=1"
+          />
+        </noscript>
         
         {/* Google Analytics 4 - Tracking Code */}
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-YYYQPS9NWX"></script>

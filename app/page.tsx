@@ -7,8 +7,9 @@ import StickyCallButton from '@/components/sticky-call-button'
 const PHONE_NUMBER = '(866) 649-9062'
 const PHONE_LINK = 'tel:8666499062'
 
-// GA4 Event Tracking Functions
+// GA4 + Meta Pixel Event Tracking Functions
 const trackCTAClick = (location: string) => {
+  // GA4 Event
   if (typeof window !== 'undefined' && (window as any).gtag) {
     (window as any).gtag('event', 'cta_click', {
       event_category: 'engagement',
@@ -17,19 +18,59 @@ const trackCTAClick = (location: string) => {
       phone_number: PHONE_NUMBER,
     })
   }
+  
+  // Meta Pixel Contact Event
+  if (typeof window !== 'undefined' && (window as any).fbq) {
+    (window as any).fbq('track', 'Contact', {
+      content_name: 'Auto Insurance CTA',
+      content_category: 'auto_insurance',
+      value: 0.50,
+      currency: 'USD'
+    })
+  }
 }
 
 const trackCallInitiated = (location: string) => {
+  // GA4 Event
   if (typeof window !== 'undefined' && (window as any).gtag) {
     (window as any).gtag('event', 'call_initiated', {
       event_category: 'conversion',
       event_label: location,
       offer_type: 'auto_insurance',
       phone_number: PHONE_NUMBER,
-      value: 1, // Can adjust based on lead value
+      value: 1,
     })
   }
-  // TODO: Add Meta Pixel 'Lead' event here when Pixel ID is configured
+  
+  // Meta Pixel Lead Event
+  if (typeof window !== 'undefined' && (window as any).fbq) {
+    (window as any).fbq('track', 'Lead', {
+      content_name: 'Phone Call Initiated',
+      content_category: 'auto_insurance',
+      value: 1.00,
+      currency: 'USD'
+    })
+  }
+  
+  // Send to Conversion API (server-side tracking)
+  if (typeof window !== 'undefined') {
+    fetch('/api/meta-conversion', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        event_name: 'Lead',
+        event_source_url: window.location.href,
+        custom_data: {
+          content_name: 'Phone Call Initiated',
+          content_category: 'auto_insurance',
+          cta_location: location,
+          phone_number: PHONE_NUMBER,
+          value: 1.00,
+          currency: 'USD'
+        }
+      })
+    }).catch(err => console.error('Conversion API error:', err))
+  }
 }
 
 export default function HomePage() {
@@ -58,7 +99,6 @@ export default function HomePage() {
                 trackCTAClick('header_top_right')
                 trackCallInitiated('header_top_right')
               }}
-              // TODO: Add Meta Pixel Contact + Lead events when Meta Pixel is configured
             >
               <Phone className="h-3.5 w-3.5 md:h-5 md:w-5 flex-shrink-0" />
               <span className="whitespace-nowrap">Call Now: {PHONE_NUMBER}</span>
@@ -97,7 +137,6 @@ export default function HomePage() {
                   trackCTAClick('hero_section')
                   trackCallInitiated('hero_section')
                 }}
-                // TODO: Add Meta Pixel Contact + Lead events when Meta Pixel is configured
               >
                 <div className="flex items-center gap-2">
                   <Phone className="h-6 w-6 md:h-7 md:w-7 flex-shrink-0" />
@@ -221,7 +260,6 @@ export default function HomePage() {
                 trackCTAClick('middle_cta_section')
                 trackCallInitiated('middle_cta_section')
               }}
-              // TODO: Add Meta Pixel Contact + Lead events when Meta Pixel is configured
             >
               <div className="flex items-center gap-3">
                 <Phone className="h-8 w-8 md:h-10 md:w-10 animate-pulse flex-shrink-0" />
@@ -360,7 +398,6 @@ export default function HomePage() {
               trackCTAClick('bottom_cta_section')
               trackCallInitiated('bottom_cta_section')
             }}
-            // TODO: Add Meta Pixel Contact + Lead events when Meta Pixel is configured
           >
             <div className="flex items-center gap-2">
               <Phone className="h-6 w-6 md:h-7 md:w-7 flex-shrink-0" />
