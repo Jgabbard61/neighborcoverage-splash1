@@ -4,8 +4,8 @@ import Image from 'next/image'
 import { Phone, Zap, BarChart3, Briefcase, Star, Shield, CheckCircle, PhoneCall, Lock, Home } from 'lucide-react'
 import StickyCallButton from '@/components/sticky-call-button'
 
-const PHONE_NUMBER = '(111) 111-1111'
-const PHONE_LINK = 'tel:1111111111'
+const PHONE_NUMBER = '(866) 649-9062'
+const PHONE_LINK = 'tel:8666499062'
 
 // GA4 Event Tracking Function
 const trackCTAClick = (location: string) => {
@@ -30,17 +30,17 @@ export default function HomePage() {
             <Image
               src="https://cdn.abacus.ai/images/6ed37b7d-c866-4bdf-819b-2b2d15119789.png"
               alt="NeighborCoverage - Your Neighbor in Protection"
-              width={220}
-              height={60}
+              width={280}
+              height={75}
               priority
-              className="h-10 md:h-12 w-auto"
+              className="h-14 md:h-20 w-auto"
             />
             
             {/* Top-Right CTA Button */}
             <a
               href={PHONE_LINK}
               className="cta-button text-sm md:text-base px-4 py-2 md:px-6 md:py-3"
-              aria-label="Call NeighborCoverage now at (111) 111-1111"
+              aria-label="Call NeighborCoverage now at (866) 649-9062"
               onClick={() => trackCTAClick('header_top_right')}
               // TODO: Add Meta Pixel Contact event when Meta Pixel is configured
             >
@@ -77,7 +77,7 @@ export default function HomePage() {
               <a
                 href={PHONE_LINK}
                 className="cta-button text-lg md:text-xl px-8 py-5 shadow-2xl hover:shadow-3xl transform hover:scale-105"
-                aria-label="Call NeighborCoverage now at (111) 111-1111"
+                aria-label="Call NeighborCoverage now at (866) 649-9062"
                 onClick={() => trackCTAClick('hero_section')}
                 // TODO: Add Meta Pixel Contact event when Meta Pixel is configured
               >
@@ -195,7 +195,7 @@ export default function HomePage() {
             <a
               href={PHONE_LINK}
               className="inline-flex items-center gap-4 bg-white text-[#F97316] px-12 py-6 rounded-2xl font-bold text-2xl md:text-3xl hover:bg-gray-50 transition-all duration-300 shadow-2xl hover:shadow-3xl transform hover:scale-105"
-              aria-label="Call NeighborCoverage now at (111) 111-1111"
+              aria-label="Call NeighborCoverage now at (866) 649-9062"
               onClick={() => trackCTAClick('middle_cta_section')}
               // TODO: Add Meta Pixel Contact event when Meta Pixel is configured
             >
@@ -328,7 +328,7 @@ export default function HomePage() {
           <a
             href={PHONE_LINK}
             className="cta-button inline-flex text-xl px-10 py-5 shadow-2xl hover:shadow-3xl transform hover:scale-105"
-            aria-label="Call NeighborCoverage at (111) 111-1111"
+            aria-label="Call NeighborCoverage at (866) 649-9062"
             onClick={() => trackCTAClick('bottom_cta_section')}
             // TODO: Add Meta Pixel Contact event when Meta Pixel is configured
           >
