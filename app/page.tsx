@@ -209,7 +209,7 @@ export default function HomePage() {
             </h2>
             
             <p className="text-white text-xl md:text-2xl font-light">
-              We've Got Your Back, Just Like a Good Neighbor
+              We've Got Your Back, With True Neighborly Care
             </p>
             
             {/* HUGE CTA BUTTON */}
@@ -345,7 +345,7 @@ export default function HomePage() {
       <section className="py-16 md:py-20 bg-gradient-to-b from-[#1E3A8A] to-[#1e40af] text-white">
         <div className="container text-center space-y-8">
           <h2 className="text-white text-3xl md:text-5xl font-bold">
-            Protecting What Matters, Like a Good Neighbor Should
+            Protecting What Matters, With Neighborly Service You Can Trust
           </h2>
           <p className="text-xl md:text-2xl text-blue-100 max-w-2xl mx-auto">
             The Coverage Your Home & Auto Deserve, From Your Neighbors at NeighborCoverage
