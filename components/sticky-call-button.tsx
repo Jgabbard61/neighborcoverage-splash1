@@ -52,7 +52,7 @@ export default function StickyCallButton({ phoneNumber, phoneLink }: StickyCallB
       <div className="bg-gradient-to-r from-[#F97316] to-[#fb923c] shadow-2xl p-3">
         <a
           href={phoneLink}
-          className="flex flex-col items-center justify-center gap-2 bg-white text-[#F97316] px-6 py-4 rounded-xl font-bold hover:bg-gray-50 transition-all duration-300 shadow-lg w-full"
+          className="flex flex-col items-center justify-center gap-2 bg-white text-[#F97316] px-6 py-4 rounded-full font-bold hover:bg-gray-50 transition-all duration-300 shadow-lg w-full"
           aria-label={`Call NeighborCoverage now at ${phoneNumber}`}
           onClick={trackStickyButtonClick}
           // TODO: Add Meta Pixel Contact event when Meta Pixel is configured
