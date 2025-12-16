@@ -30,10 +30,10 @@ export default function HomePage() {
             <Image
               src="https://cdn.abacus.ai/images/6ed37b7d-c866-4bdf-819b-2b2d15119789.png"
               alt="NeighborCoverage - Your Neighbor in Protection"
-              width={280}
-              height={75}
+              width={350}
+              height={95}
               priority
-              className="h-14 md:h-20 w-auto"
+              className="h-16 md:h-24 w-auto"
             />
             
             {/* Top-Right CTA Button */}
