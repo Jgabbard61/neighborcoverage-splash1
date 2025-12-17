@@ -23,6 +23,26 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { event_name, event_source_url, custom_data } = body
 
+    // CRITICAL: Only track events from production domains
+    if (event_source_url) {
+      try {
+        const url = new URL(event_source_url)
+        const hostname = url.hostname
+        const isProduction = hostname === 'www.neighborcoverage.com' || hostname === 'neighborcoverage.com'
+        
+        if (!isProduction) {
+          console.log('[Conversion API] Skipping - not production domain:', hostname)
+          return NextResponse.json({ 
+            success: false, 
+            message: 'Events only tracked on production domains',
+            hostname: hostname 
+          })
+        }
+      } catch (urlError) {
+        console.error('[Conversion API] Invalid event_source_url:', urlError)
+      }
+    }
+
     // Get client IP and user agent for better tracking
     const clientIp = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || ''
     const userAgent = request.headers.get('user-agent') || ''

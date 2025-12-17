@@ -30,6 +30,17 @@ export default function StickyCallButton({ phoneNumber, phoneLink }: StickyCallB
 
   // GA4 + Meta Pixel Event Tracking for Sticky Mobile Button
   const trackStickyButtonClick = () => {
+    // CRITICAL: Only track on production domains
+    if (typeof window !== 'undefined') {
+      const hostname = window.location.hostname
+      const isProduction = hostname === 'www.neighborcoverage.com' || hostname === 'neighborcoverage.com'
+      
+      if (!isProduction) {
+        console.log('[Tracking] Skipping sticky button tracking - not production domain:', hostname)
+        return
+      }
+    }
+    
     // GA4 Events
     if (typeof window !== 'undefined' && (window as any).gtag) {
       try {
@@ -48,12 +59,12 @@ export default function StickyCallButton({ phoneNumber, phoneLink }: StickyCallB
           phone_number: phoneNumber,
           value: 1,
         })
-        console.log('GA4 events tracked: cta_click, call_initiated (sticky button)')
+        console.log('[GA4] events tracked: cta_click, call_initiated (sticky button)')
       } catch (error) {
-        console.error('GA4 tracking error:', error)
+        console.error('[GA4] tracking error:', error)
       }
     } else {
-      console.warn('GA4 gtag not available')
+      console.warn('[GA4] gtag not available')
     }
     
     // Meta Pixel Lead Event Only
@@ -65,12 +76,12 @@ export default function StickyCallButton({ phoneNumber, phoneLink }: StickyCallB
           value: 1.00,
           currency: 'USD'
         })
-        console.log('Meta Pixel Lead event tracked (sticky button)')
+        console.log('[Meta Pixel] Lead event tracked (sticky button)')
       } catch (error) {
-        console.error('Meta Pixel tracking error:', error)
+        console.error('[Meta Pixel] tracking error:', error)
       }
     } else {
-      console.warn('Meta Pixel fbq not available')
+      console.warn('[Meta Pixel] fbq not available')
     }
     
     // Send to Conversion API (server-side tracking)
@@ -92,8 +103,8 @@ export default function StickyCallButton({ phoneNumber, phoneLink }: StickyCallB
         })
       })
       .then(res => res.json())
-      .then(data => console.log('Conversion API success:', data))
-      .catch(err => console.error('Conversion API error:', err))
+      .then(data => console.log('[Conversion API] success:', data))
+      .catch(err => console.error('[Conversion API] error:', err))
     }
   }
 

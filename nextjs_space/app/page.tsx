@@ -9,6 +9,17 @@ const PHONE_LINK = 'tel:8666499062'
 
 // GA4 Event Tracking Function
 const trackCTAClick = (location: string) => {
+  // CRITICAL: Only track on production domains
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname
+    const isProduction = hostname === 'www.neighborcoverage.com' || hostname === 'neighborcoverage.com'
+    
+    if (!isProduction) {
+      console.log('[Tracking] Skipping CTA tracking - not production domain:', hostname)
+      return
+    }
+  }
+  
   // GA4 Event
   if (typeof window !== 'undefined' && (window as any).gtag) {
     try {
@@ -18,16 +29,27 @@ const trackCTAClick = (location: string) => {
         offer_type: 'auto_insurance',
         phone_number: PHONE_NUMBER,
       })
-      console.log('GA4 cta_click event tracked:', location)
+      console.log('[GA4] cta_click event tracked:', location)
     } catch (error) {
-      console.error('GA4 tracking error:', error)
+      console.error('[GA4] tracking error:', error)
     }
   } else {
-    console.warn('GA4 gtag not available')
+    console.warn('[GA4] gtag not available')
   }
 }
 
 const trackCallInitiated = (location: string) => {
+  // CRITICAL: Only track on production domains
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname
+    const isProduction = hostname === 'www.neighborcoverage.com' || hostname === 'neighborcoverage.com'
+    
+    if (!isProduction) {
+      console.log('[Tracking] Skipping event tracking - not production domain:', hostname)
+      return
+    }
+  }
+  
   // GA4 Event
   if (typeof window !== 'undefined' && (window as any).gtag) {
     try {
@@ -38,12 +60,12 @@ const trackCallInitiated = (location: string) => {
         phone_number: PHONE_NUMBER,
         value: 1,
       })
-      console.log('GA4 call_initiated event tracked:', location)
+      console.log('[GA4] call_initiated event tracked:', location)
     } catch (error) {
-      console.error('GA4 tracking error:', error)
+      console.error('[GA4] tracking error:', error)
     }
   } else {
-    console.warn('GA4 gtag not available')
+    console.warn('[GA4] gtag not available')
   }
   
   // Meta Pixel Lead Event
@@ -55,12 +77,12 @@ const trackCallInitiated = (location: string) => {
         value: 1.00,
         currency: 'USD'
       })
-      console.log('Meta Pixel Lead event tracked:', location)
+      console.log('[Meta Pixel] Lead event tracked:', location)
     } catch (error) {
-      console.error('Meta Pixel tracking error:', error)
+      console.error('[Meta Pixel] tracking error:', error)
     }
   } else {
-    console.warn('Meta Pixel fbq not available')
+    console.warn('[Meta Pixel] fbq not available')
   }
   
   // Send to Conversion API (server-side tracking)
@@ -82,8 +104,8 @@ const trackCallInitiated = (location: string) => {
       })
     })
     .then(res => res.json())
-    .then(data => console.log('Conversion API success:', data))
-    .catch(err => console.error('Conversion API error:', err))
+    .then(data => console.log('[Conversion API] success:', data))
+    .catch(err => console.error('[Conversion API] error:', err))
   }
 }
 
