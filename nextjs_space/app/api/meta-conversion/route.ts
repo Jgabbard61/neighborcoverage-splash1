@@ -200,6 +200,22 @@ export async function POST(request: NextRequest) {
       access_token: ACCESS_TOKEN,
     }
 
+    // CRITICAL DEBUGGING: Log the EXACT payload being sent to Meta (with access_token removed for security)
+    const debugPayload = {
+      ...eventData,
+      access_token: '***REDACTED***',
+      data: eventData.data.map(event => ({
+        ...event,
+        user_data: {
+          ...event.user_data,
+          client_ip_address: event.user_data.client_ip_address ? `${event.user_data.client_ip_address.substring(0, 10)}...` : undefined,
+        }
+      }))
+    }
+    console.log('[Conversion API] ===== EXACT PAYLOAD BEING SENT TO META =====')
+    console.log(JSON.stringify(debugPayload, null, 2))
+    console.log('[Conversion API] ===== END PAYLOAD =====')
+
     // Send to Meta Conversions API
     if (ACCESS_TOKEN) {
       const response = await fetch(API_URL, {
