@@ -97,13 +97,15 @@ export async function POST(request: NextRequest) {
       enhancedUserData.ct = hashData(user_data.city)
     }
 
-    console.log('[Conversion API] Enhanced user_data:', {
-      has_fbc: !!enhancedUserData.fbc,
-      has_fbp: !!enhancedUserData.fbp,
-      has_external_id: !!enhancedUserData.external_id,
-      has_phone: !!enhancedUserData.ph,
-      has_email: !!enhancedUserData.em,
-      has_ip: !!enhancedUserData.client_ip_address,
+    // Enhanced logging with actual values (hashed values shown for verification)
+    console.log('[Conversion API] Enhanced user_data being sent to Meta:', {
+      fbc: enhancedUserData.fbc ? `${enhancedUserData.fbc.substring(0, 15)}...` : null,
+      fbp: enhancedUserData.fbp ? `${enhancedUserData.fbp.substring(0, 15)}...` : null,
+      external_id: enhancedUserData.external_id || null,
+      ph_hashed: enhancedUserData.ph ? `${enhancedUserData.ph.substring(0, 10)}...` : null,
+      em_hashed: enhancedUserData.em ? `${enhancedUserData.em.substring(0, 10)}...` : null,
+      country_hashed: enhancedUserData.country ? `${enhancedUserData.country.substring(0, 10)}...` : null,
+      client_ip: enhancedUserData.client_ip_address ? `${enhancedUserData.client_ip_address.substring(0, 10)}...` : null,
       has_user_agent: !!enhancedUserData.client_user_agent,
     })
 
@@ -136,12 +138,20 @@ export async function POST(request: NextRequest) {
       const result = await response.json()
 
       if (!response.ok) {
-        console.error('Meta Conversions API error:', result)
+        console.error('[Conversion API] Meta API ERROR:', JSON.stringify(result, null, 2))
         return NextResponse.json(
           { error: 'Failed to send event to Meta', details: result },
           { status: 500 }
         )
       }
+
+      // Log successful Meta API response
+      console.log('[Conversion API] Meta API SUCCESS:', {
+        event_id: eventId,
+        events_received: result.events_received || 0,
+        messages: result.messages || [],
+        fbtrace_id: result.fbtrace_id || 'N/A',
+      })
 
       return NextResponse.json({ success: true, event_id: eventId, meta_response: result })
     } else {

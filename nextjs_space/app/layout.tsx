@@ -64,11 +64,11 @@ export default function RootLayout({
                 'https://connect.facebook.net/en_US/fbevents.js');
                 
                 // Initialize Meta Pixel only once with safeguard
+                // NOTE: fbq('init') automatically tracks PageView - no need to call fbq('track', 'PageView')
                 if (!window._fbq_initialized) {
                   window._fbq_initialized = true;
                   fbq('init', '1884617578809782');
-                  fbq('track', 'PageView');
-                  console.log('[Meta Pixel] Initialized successfully on production');
+                  console.log('[Meta Pixel] Initialized successfully on production (PageView auto-tracked by init)');
                 } else {
                   console.warn('[Meta Pixel] Already initialized, skipping');
                 }

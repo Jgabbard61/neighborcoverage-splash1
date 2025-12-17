@@ -140,12 +140,14 @@ export default function StickyCallButton({ phoneNumber, phoneLink }: StickyCallB
         country: 'us',  // United States
       }
       
+      // Enhanced logging with actual values (first few characters for verification)
       console.log('[Conversion API] Sending enhanced user_data (sticky button):', {
         event_id: eventId,
-        has_fbc: !!fbc,
-        has_fbp: !!fbp,
-        has_external_id: !!externalId,
-        has_phone: true,
+        fbc: fbc ? `${fbc.substring(0, 15)}...` : null,
+        fbp: fbp ? `${fbp.substring(0, 15)}...` : null,
+        external_id: externalId,
+        phone: '+18666499062 (will be hashed server-side)',
+        country: 'us',
       })
       
       fetch('/api/meta-conversion', {
