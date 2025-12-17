@@ -9,8 +9,20 @@ const ACCESS_TOKEN = process.env.META_CONVERSION_API_TOKEN || ''
 const API_URL = `https://graph.facebook.com/v18.0/${PIXEL_ID}/events`
 
 // Hash function for user data (required by Meta for privacy)
-function hashData(data: string): string {
-  return crypto.createHash('sha256').update(data.toLowerCase().trim()).digest('hex')
+// Different data types require different normalization before hashing
+function hashData(data: string, type: 'email' | 'phone' | 'text' | 'country' = 'text'): string {
+  let normalized = data.trim()
+  
+  if (type === 'phone') {
+    // Phone: Remove all symbols (+, -, spaces, parentheses), keep only digits
+    // Must include country code (e.g., 18666499062 for US number)
+    normalized = normalized.replace(/[^\d]/g, '')
+  } else if (type === 'email' || type === 'text' || type === 'country') {
+    // Email, names, city, state, zip, country: Lowercase and trim
+    normalized = normalized.toLowerCase()
+  }
+  
+  return crypto.createHash('sha256').update(normalized).digest('hex')
 }
 
 // Generate event ID for deduplication (browser + server events with same ID = counted once)
@@ -73,28 +85,33 @@ export async function POST(request: NextRequest) {
 
     // Add business phone number (hashed) - improves Event Match Quality
     // Using the NeighborCoverage phone number as customer contact point
+    // CRITICAL: Meta requires hashed parameters as ARRAYS
     if (user_data?.phone) {
-      enhancedUserData.ph = hashData(user_data.phone)
+      enhancedUserData.ph = [hashData(user_data.phone, 'phone')]
     }
 
     // Add email if provided (hashed) - CRITICAL for Event Match Quality
+    // CRITICAL: Meta requires hashed parameters as ARRAYS
     if (user_data?.email) {
-      enhancedUserData.em = hashData(user_data.email)
+      enhancedUserData.em = [hashData(user_data.email, 'email')]
     }
 
     // Add country if provided
+    // CRITICAL: Meta requires hashed parameters as ARRAYS
     if (user_data?.country) {
-      enhancedUserData.country = hashData(user_data.country)
+      enhancedUserData.country = [hashData(user_data.country, 'country')]
     }
 
     // Add state if provided
+    // CRITICAL: Meta requires hashed parameters as ARRAYS
     if (user_data?.state) {
-      enhancedUserData.st = hashData(user_data.state)
+      enhancedUserData.st = [hashData(user_data.state, 'text')]
     }
 
     // Add city if provided
+    // CRITICAL: Meta requires hashed parameters as ARRAYS
     if (user_data?.city) {
-      enhancedUserData.ct = hashData(user_data.city)
+      enhancedUserData.ct = [hashData(user_data.city, 'text')]
     }
 
     // Enhanced logging with actual values (hashed values shown for verification)
@@ -102,12 +119,32 @@ export async function POST(request: NextRequest) {
       fbc: enhancedUserData.fbc ? `${enhancedUserData.fbc.substring(0, 15)}...` : null,
       fbp: enhancedUserData.fbp ? `${enhancedUserData.fbp.substring(0, 15)}...` : null,
       external_id: enhancedUserData.external_id || null,
-      ph_hashed: enhancedUserData.ph ? `${enhancedUserData.ph.substring(0, 10)}...` : null,
-      em_hashed: enhancedUserData.em ? `${enhancedUserData.em.substring(0, 10)}...` : null,
-      country_hashed: enhancedUserData.country ? `${enhancedUserData.country.substring(0, 10)}...` : null,
+      ph_hashed_array: enhancedUserData.ph ? `[${enhancedUserData.ph[0].substring(0, 10)}...]` : null,
+      em_hashed_array: enhancedUserData.em ? `[${enhancedUserData.em[0].substring(0, 10)}...]` : null,
+      country_hashed_array: enhancedUserData.country ? `[${enhancedUserData.country[0].substring(0, 10)}...]` : null,
       client_ip: enhancedUserData.client_ip_address ? `${enhancedUserData.client_ip_address.substring(0, 10)}...` : null,
       has_user_agent: !!enhancedUserData.client_user_agent,
     })
+    
+    // Log the complete payload structure being sent to Meta (for debugging)
+    console.log('[Conversion API] Complete payload structure:', JSON.stringify({
+      event_name: event_name || 'Lead',
+      event_time: 'TIMESTAMP',
+      event_id: eventId,
+      event_source_url: event_source_url ? event_source_url.substring(0, 30) + '...' : 'N/A',
+      action_source: 'website',
+      user_data_keys: Object.keys(enhancedUserData),
+      user_data_sample: {
+        has_fbc: !!enhancedUserData.fbc,
+        has_fbp: !!enhancedUserData.fbp,
+        has_external_id: !!enhancedUserData.external_id,
+        has_ph_array: Array.isArray(enhancedUserData.ph),
+        has_em_array: Array.isArray(enhancedUserData.em),
+        has_country_array: Array.isArray(enhancedUserData.country),
+        has_client_ip: !!enhancedUserData.client_ip_address,
+        has_user_agent: !!enhancedUserData.client_user_agent,
+      }
+    }, null, 2))
 
     // Prepare event data for Meta Conversions API
     const eventData = {
