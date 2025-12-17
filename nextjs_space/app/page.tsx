@@ -7,49 +7,60 @@ import StickyCallButton from '@/components/sticky-call-button'
 const PHONE_NUMBER = '(866) 649-9062'
 const PHONE_LINK = 'tel:8666499062'
 
-// GA4 + Meta Pixel Event Tracking Functions
+// GA4 Event Tracking Function
 const trackCTAClick = (location: string) => {
   // GA4 Event
   if (typeof window !== 'undefined' && (window as any).gtag) {
-    (window as any).gtag('event', 'cta_click', {
-      event_category: 'engagement',
-      event_label: location,
-      offer_type: 'auto_insurance',
-      phone_number: PHONE_NUMBER,
-    })
-  }
-  
-  // Meta Pixel Contact Event
-  if (typeof window !== 'undefined' && (window as any).fbq) {
-    (window as any).fbq('track', 'Contact', {
-      content_name: 'Auto Insurance CTA',
-      content_category: 'auto_insurance',
-      value: 0.50,
-      currency: 'USD'
-    })
+    try {
+      (window as any).gtag('event', 'cta_click', {
+        event_category: 'engagement',
+        event_label: location,
+        offer_type: 'auto_insurance',
+        phone_number: PHONE_NUMBER,
+      })
+      console.log('GA4 cta_click event tracked:', location)
+    } catch (error) {
+      console.error('GA4 tracking error:', error)
+    }
+  } else {
+    console.warn('GA4 gtag not available')
   }
 }
 
 const trackCallInitiated = (location: string) => {
   // GA4 Event
   if (typeof window !== 'undefined' && (window as any).gtag) {
-    (window as any).gtag('event', 'call_initiated', {
-      event_category: 'conversion',
-      event_label: location,
-      offer_type: 'auto_insurance',
-      phone_number: PHONE_NUMBER,
-      value: 1,
-    })
+    try {
+      (window as any).gtag('event', 'call_initiated', {
+        event_category: 'conversion',
+        event_label: location,
+        offer_type: 'auto_insurance',
+        phone_number: PHONE_NUMBER,
+        value: 1,
+      })
+      console.log('GA4 call_initiated event tracked:', location)
+    } catch (error) {
+      console.error('GA4 tracking error:', error)
+    }
+  } else {
+    console.warn('GA4 gtag not available')
   }
   
   // Meta Pixel Lead Event
   if (typeof window !== 'undefined' && (window as any).fbq) {
-    (window as any).fbq('track', 'Lead', {
-      content_name: 'Phone Call Initiated',
-      content_category: 'auto_insurance',
-      value: 1.00,
-      currency: 'USD'
-    })
+    try {
+      (window as any).fbq('track', 'Lead', {
+        content_name: 'Phone Call Initiated',
+        content_category: 'auto_insurance',
+        value: 1.00,
+        currency: 'USD'
+      })
+      console.log('Meta Pixel Lead event tracked:', location)
+    } catch (error) {
+      console.error('Meta Pixel tracking error:', error)
+    }
+  } else {
+    console.warn('Meta Pixel fbq not available')
   }
   
   // Send to Conversion API (server-side tracking)
@@ -69,7 +80,10 @@ const trackCallInitiated = (location: string) => {
           currency: 'USD'
         }
       })
-    }).catch(err => console.error('Conversion API error:', err))
+    })
+    .then(res => res.json())
+    .then(data => console.log('Conversion API success:', data))
+    .catch(err => console.error('Conversion API error:', err))
   }
 }
 

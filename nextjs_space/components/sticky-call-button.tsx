@@ -32,39 +32,45 @@ export default function StickyCallButton({ phoneNumber, phoneLink }: StickyCallB
   const trackStickyButtonClick = () => {
     // GA4 Events
     if (typeof window !== 'undefined' && (window as any).gtag) {
-      // Track CTA click
-      (window as any).gtag('event', 'cta_click', {
-        event_category: 'engagement',
-        event_label: 'sticky_mobile_button',
-        offer_type: 'auto_insurance',
-        phone_number: phoneNumber,
-      })
-      // Track call initiated
-      (window as any).gtag('event', 'call_initiated', {
-        event_category: 'conversion',
-        event_label: 'sticky_mobile_button',
-        offer_type: 'auto_insurance',
-        phone_number: phoneNumber,
-        value: 1,
-      })
+      try {
+        // Track CTA click
+        (window as any).gtag('event', 'cta_click', {
+          event_category: 'engagement',
+          event_label: 'sticky_mobile_button',
+          offer_type: 'auto_insurance',
+          phone_number: phoneNumber,
+        })
+        // Track call initiated
+        (window as any).gtag('event', 'call_initiated', {
+          event_category: 'conversion',
+          event_label: 'sticky_mobile_button',
+          offer_type: 'auto_insurance',
+          phone_number: phoneNumber,
+          value: 1,
+        })
+        console.log('GA4 events tracked: cta_click, call_initiated (sticky button)')
+      } catch (error) {
+        console.error('GA4 tracking error:', error)
+      }
+    } else {
+      console.warn('GA4 gtag not available')
     }
     
-    // Meta Pixel Events
+    // Meta Pixel Lead Event Only
     if (typeof window !== 'undefined' && (window as any).fbq) {
-      // Contact Event
-      (window as any).fbq('track', 'Contact', {
-        content_name: 'Auto Insurance CTA',
-        content_category: 'auto_insurance',
-        value: 0.50,
-        currency: 'USD'
-      })
-      // Lead Event
-      (window as any).fbq('track', 'Lead', {
-        content_name: 'Phone Call Initiated',
-        content_category: 'auto_insurance',
-        value: 1.00,
-        currency: 'USD'
-      })
+      try {
+        (window as any).fbq('track', 'Lead', {
+          content_name: 'Phone Call Initiated',
+          content_category: 'auto_insurance',
+          value: 1.00,
+          currency: 'USD'
+        })
+        console.log('Meta Pixel Lead event tracked (sticky button)')
+      } catch (error) {
+        console.error('Meta Pixel tracking error:', error)
+      }
+    } else {
+      console.warn('Meta Pixel fbq not available')
     }
     
     // Send to Conversion API (server-side tracking)
@@ -84,7 +90,10 @@ export default function StickyCallButton({ phoneNumber, phoneLink }: StickyCallB
             currency: 'USD'
           }
         })
-      }).catch(err => console.error('Conversion API error:', err))
+      })
+      .then(res => res.json())
+      .then(data => console.log('Conversion API success:', data))
+      .catch(err => console.error('Conversion API error:', err))
     }
   }
 
@@ -103,7 +112,6 @@ export default function StickyCallButton({ phoneNumber, phoneLink }: StickyCallB
           className="flex flex-col items-center justify-center gap-2 bg-white text-[#F97316] px-6 py-4 rounded-full font-bold hover:bg-gray-50 transition-all duration-300 shadow-lg w-full"
           aria-label={`Call NeighborCoverage now at ${phoneNumber}`}
           onClick={trackStickyButtonClick}
-          // TODO: Add Meta Pixel Contact event when Meta Pixel is configured
         >
           <div className="flex items-center gap-2">
             <Phone className="h-5 w-5 animate-pulse flex-shrink-0" />

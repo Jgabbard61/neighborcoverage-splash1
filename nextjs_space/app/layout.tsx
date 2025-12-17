@@ -42,8 +42,13 @@ export default function RootLayout({
               t.src=v;s=b.getElementsByTagName(e)[0];
               s.parentNode.insertBefore(t,s)}(window, document,'script',
               'https://connect.facebook.net/en_US/fbevents.js');
-              fbq('init', '1884617578809782');
-              fbq('track', 'PageView');
+              
+              // Initialize Meta Pixel only once
+              if (!window._fbq_initialized) {
+                fbq('init', '1884617578809782');
+                fbq('track', 'PageView');
+                window._fbq_initialized = true;
+              }
             `,
           }}
         />
@@ -64,10 +69,16 @@ export default function RootLayout({
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
+              
+              // Configure GA4 with proper settings
               gtag('config', 'G-YYYQPS9NWX', {
                 page_path: window.location.pathname,
-                send_page_view: true
+                send_page_view: true,
+                cookie_flags: 'SameSite=None;Secure'
               });
+              
+              // Log initialization for debugging
+              console.log('GA4 initialized with ID: G-YYYQPS9NWX');
             `,
           }}
         />
