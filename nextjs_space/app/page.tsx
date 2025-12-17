@@ -7,6 +7,42 @@ import StickyCallButton from '@/components/sticky-call-button'
 const PHONE_NUMBER = '(866) 649-9062'
 const PHONE_LINK = 'tel:8666499062'
 
+// Helper function to get Facebook cookies for Event Match Quality
+const getFacebookCookies = () => {
+  if (typeof window === 'undefined') return { fbc: null, fbp: null }
+  
+  // Get _fbc (Facebook Click ID) cookie
+  const fbcMatch = document.cookie.match(/(^|;)\s*_fbc\s*=\s*([^;]+)/)
+  const fbc = fbcMatch ? fbcMatch[2] : null
+  
+  // Get _fbp (Facebook Browser ID) cookie
+  const fbpMatch = document.cookie.match(/(^|;)\s*_fbp\s*=\s*([^;]+)/)
+  const fbp = fbpMatch ? fbpMatch[2] : null
+  
+  return { fbc, fbp }
+}
+
+// Helper function to generate or retrieve External ID for user tracking
+const getExternalId = () => {
+  if (typeof window === 'undefined') return null
+  
+  // Try to get existing external_id from sessionStorage
+  let externalId = sessionStorage.getItem('nc_external_id')
+  
+  // If not exists, generate a new one
+  if (!externalId) {
+    externalId = `nc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    sessionStorage.setItem('nc_external_id', externalId)
+  }
+  
+  return externalId
+}
+
+// Helper function to generate consistent event_id for deduplication
+const generateEventId = () => {
+  return `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+}
+
 // GA4 Event Tracking Function
 const trackCTAClick = (location: string) => {
   // CRITICAL: Only track on production domains
@@ -68,7 +104,10 @@ const trackCallInitiated = (location: string) => {
     console.warn('[GA4] gtag not available')
   }
   
-  // Meta Pixel Lead Event
+  // Generate event_id for deduplication between browser and server
+  const eventId = generateEventId()
+  
+  // Meta Pixel Lead Event with event_id for deduplication
   if (typeof window !== 'undefined' && (window as any).fbq) {
     try {
       (window as any).fbq('track', 'Lead', {
@@ -76,8 +115,10 @@ const trackCallInitiated = (location: string) => {
         content_category: 'auto_insurance',
         value: 1.00,
         currency: 'USD'
+      }, {
+        eventID: eventId  // For deduplication with Conversion API
       })
-      console.log('[Meta Pixel] Lead event tracked:', location)
+      console.log('[Meta Pixel] Lead event tracked:', location, 'eventID:', eventId)
     } catch (error) {
       console.error('[Meta Pixel] tracking error:', error)
     }
@@ -85,14 +126,36 @@ const trackCallInitiated = (location: string) => {
     console.warn('[Meta Pixel] fbq not available')
   }
   
-  // Send to Conversion API (server-side tracking)
+  // Send to Conversion API with ENHANCED customer data for Event Match Quality
   if (typeof window !== 'undefined') {
+    const { fbc, fbp } = getFacebookCookies()
+    const externalId = getExternalId()
+    
+    // Build user_data with all available parameters for maximum Event Match Quality
+    const userData: any = {
+      event_id: eventId,  // Same as browser event for deduplication
+      external_id: externalId,
+      fbc: fbc,
+      fbp: fbp,
+      phone: '+18666499062',  // E.164 format: +1 (country code) + 8666499062
+      country: 'us',  // United States
+    }
+    
+    console.log('[Conversion API] Sending enhanced user_data:', {
+      event_id: eventId,
+      has_fbc: !!fbc,
+      has_fbp: !!fbp,
+      has_external_id: !!externalId,
+      has_phone: true,
+    })
+    
     fetch('/api/meta-conversion', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         event_name: 'Lead',
         event_source_url: window.location.href,
+        user_data: userData,
         custom_data: {
           content_name: 'Phone Call Initiated',
           content_category: 'auto_insurance',

@@ -21,7 +21,7 @@ function generateEventId(): string {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { event_name, event_source_url, custom_data } = body
+    const { event_name, event_source_url, custom_data, user_data } = body
 
     // CRITICAL: Only track events from production domains
     if (event_source_url) {
@@ -47,8 +47,65 @@ export async function POST(request: NextRequest) {
     const clientIp = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || ''
     const userAgent = request.headers.get('user-agent') || ''
 
-    // Generate event ID (should ideally come from client for deduplication)
-    const eventId = generateEventId()
+    // Use event_id from client for proper deduplication, or generate one
+    const eventId = user_data?.event_id || generateEventId()
+
+    // Build enhanced user_data object with all available parameters
+    const enhancedUserData: any = {
+      client_ip_address: clientIp.split(',')[0].trim(),
+      client_user_agent: userAgent,
+    }
+
+    // Add Facebook Click ID (fbc) if provided - CRITICAL for Event Match Quality
+    if (user_data?.fbc) {
+      enhancedUserData.fbc = user_data.fbc
+    }
+
+    // Add Facebook Browser ID (fbp) if provided - CRITICAL for Event Match Quality
+    if (user_data?.fbp) {
+      enhancedUserData.fbp = user_data.fbp
+    }
+
+    // Add External ID if provided - helps with deduplication and matching
+    if (user_data?.external_id) {
+      enhancedUserData.external_id = user_data.external_id
+    }
+
+    // Add business phone number (hashed) - improves Event Match Quality
+    // Using the NeighborCoverage phone number as customer contact point
+    if (user_data?.phone) {
+      enhancedUserData.ph = hashData(user_data.phone)
+    }
+
+    // Add email if provided (hashed) - CRITICAL for Event Match Quality
+    if (user_data?.email) {
+      enhancedUserData.em = hashData(user_data.email)
+    }
+
+    // Add country if provided
+    if (user_data?.country) {
+      enhancedUserData.country = hashData(user_data.country)
+    }
+
+    // Add state if provided
+    if (user_data?.state) {
+      enhancedUserData.st = hashData(user_data.state)
+    }
+
+    // Add city if provided
+    if (user_data?.city) {
+      enhancedUserData.ct = hashData(user_data.city)
+    }
+
+    console.log('[Conversion API] Enhanced user_data:', {
+      has_fbc: !!enhancedUserData.fbc,
+      has_fbp: !!enhancedUserData.fbp,
+      has_external_id: !!enhancedUserData.external_id,
+      has_phone: !!enhancedUserData.ph,
+      has_email: !!enhancedUserData.em,
+      has_ip: !!enhancedUserData.client_ip_address,
+      has_user_agent: !!enhancedUserData.client_user_agent,
+    })
 
     // Prepare event data for Meta Conversions API
     const eventData = {
@@ -59,13 +116,7 @@ export async function POST(request: NextRequest) {
           event_id: eventId,
           event_source_url: event_source_url || '',
           action_source: 'website',
-          user_data: {
-            client_ip_address: clientIp.split(',')[0].trim(),
-            client_user_agent: userAgent,
-            // Add hashed email/phone if you collect them in a form
-            // em: hashData('user@example.com'),
-            // ph: hashData('+15551234567'),
-          },
+          user_data: enhancedUserData,
           custom_data: custom_data || {},
         },
       ],
