@@ -59,6 +59,22 @@ export async function POST(request: NextRequest) {
     const clientIp = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || ''
     const userAgent = request.headers.get('user-agent') || ''
 
+    // Get geolocation data from Vercel headers (automatically provided on Vercel deployments)
+    const geoCity = request.headers.get('x-vercel-ip-city') || ''
+    const geoState = request.headers.get('x-vercel-ip-country-region') || ''
+    const geoZip = request.headers.get('x-vercel-ip-postal-code') || ''
+    
+    // Decode city name from URL encoding (Vercel encodes city names)
+    const decodedCity = geoCity ? decodeURIComponent(geoCity) : ''
+    
+    // Log geographic data for insights
+    console.log('[Conversion API] Geographic data from IP:', {
+      city: decodedCity || 'Not available',
+      state: geoState || 'Not available',
+      zip: geoZip || 'Not available',
+      ip: clientIp ? `${clientIp.split(',')[0].substring(0, 10)}...` : 'Not available',
+    })
+
     // Use event_id from client for proper deduplication, or generate one
     const eventId = user_data?.event_id || generateEventId()
 
@@ -102,16 +118,24 @@ export async function POST(request: NextRequest) {
       enhancedUserData.country = [hashData(user_data.country, 'country')]
     }
 
-    // Add state if provided
+    // Add geographic data (prioritize IP geolocation over client-provided data)
     // CRITICAL: Meta requires hashed parameters as ARRAYS
-    if (user_data?.state) {
-      enhancedUserData.st = [hashData(user_data.state, 'text')]
+    
+    // Add city - use IP geolocation or fallback to client-provided data
+    const cityToUse = decodedCity || user_data?.city
+    if (cityToUse) {
+      enhancedUserData.ct = [hashData(cityToUse, 'text')]
     }
-
-    // Add city if provided
-    // CRITICAL: Meta requires hashed parameters as ARRAYS
-    if (user_data?.city) {
-      enhancedUserData.ct = [hashData(user_data.city, 'text')]
+    
+    // Add state - use IP geolocation or fallback to client-provided data
+    const stateToUse = geoState || user_data?.state
+    if (stateToUse) {
+      enhancedUserData.st = [hashData(stateToUse, 'text')]
+    }
+    
+    // Add zip code - use IP geolocation (NEW: improves Event Match Quality)
+    if (geoZip) {
+      enhancedUserData.zp = [hashData(geoZip, 'text')]
     }
 
     // Enhanced logging with actual values (hashed values shown for verification)
@@ -122,8 +146,19 @@ export async function POST(request: NextRequest) {
       ph_hashed_array: enhancedUserData.ph ? `[${enhancedUserData.ph[0].substring(0, 10)}...]` : null,
       em_hashed_array: enhancedUserData.em ? `[${enhancedUserData.em[0].substring(0, 10)}...]` : null,
       country_hashed_array: enhancedUserData.country ? `[${enhancedUserData.country[0].substring(0, 10)}...]` : null,
+      ct_hashed_array: enhancedUserData.ct ? `[${enhancedUserData.ct[0].substring(0, 10)}...]` : null,
+      st_hashed_array: enhancedUserData.st ? `[${enhancedUserData.st[0].substring(0, 10)}...]` : null,
+      zp_hashed_array: enhancedUserData.zp ? `[${enhancedUserData.zp[0].substring(0, 10)}...]` : null,
       client_ip: enhancedUserData.client_ip_address ? `${enhancedUserData.client_ip_address.substring(0, 10)}...` : null,
       has_user_agent: !!enhancedUserData.client_user_agent,
+    })
+    
+    // Log raw geographic data for campaign targeting insights
+    console.log('[Conversion API] Geographic Insights:', {
+      city_used: cityToUse || 'Not available',
+      state_used: stateToUse || 'Not available',
+      zip_used: geoZip || 'Not available',
+      source: (decodedCity || geoState || geoZip) ? 'IP Geolocation (Vercel)' : 'Client-provided or unavailable',
     })
     
     // Log the complete payload structure being sent to Meta (for debugging)
@@ -141,6 +176,9 @@ export async function POST(request: NextRequest) {
         has_ph_array: Array.isArray(enhancedUserData.ph),
         has_em_array: Array.isArray(enhancedUserData.em),
         has_country_array: Array.isArray(enhancedUserData.country),
+        has_ct_array: Array.isArray(enhancedUserData.ct),
+        has_st_array: Array.isArray(enhancedUserData.st),
+        has_zp_array: Array.isArray(enhancedUserData.zp),
         has_client_ip: !!enhancedUserData.client_ip_address,
         has_user_agent: !!enhancedUserData.client_user_agent,
       }
