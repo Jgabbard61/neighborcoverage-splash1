@@ -33,7 +33,23 @@ function generateEventId(): string {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { event_name, event_source_url, custom_data, user_data } = body
+    const { event_id, event_name, event_source_url, custom_data, user_data } = body
+
+    // CRITICAL: Read event_id from TOP-LEVEL (not from user_data) for deduplication
+    const eventId = event_id || generateEventId()
+    
+    // CRITICAL DEDUPLICATION LOGGING
+    if (event_id) {
+      console.log('╔════════════════════════════════════════════════════════════')
+      console.log('║ [DEDUPLICATION] Server received event_id from client')
+      console.log('║ event_id:', eventId)
+      console.log('║ This MUST match the Pixel eventID for deduplication to work')
+      console.log('╚════════════════════════════════════════════════════════════')
+    } else {
+      console.warn('⚠️  [DEDUPLICATION WARNING] No event_id received from client!')
+      console.warn('⚠️  Generated new event_id:', eventId)
+      console.warn('⚠️  This will NOT deduplicate with Pixel event')
+    }
 
     // CRITICAL: Only track events from production domains
     if (event_source_url) {
@@ -74,9 +90,6 @@ export async function POST(request: NextRequest) {
       zip: geoZip || 'Not available',
       ip: clientIp ? `${clientIp.split(',')[0].substring(0, 10)}...` : 'Not available',
     })
-
-    // Use event_id from client for proper deduplication, or generate one
-    const eventId = user_data?.event_id || generateEventId()
 
     // Build enhanced user_data object with all available parameters
     const enhancedUserData: any = {
@@ -215,6 +228,15 @@ export async function POST(request: NextRequest) {
     console.log('[Conversion API] ===== EXACT PAYLOAD BEING SENT TO META =====')
     console.log(JSON.stringify(debugPayload, null, 2))
     console.log('[Conversion API] ===== END PAYLOAD =====')
+    
+    // CRITICAL DEDUPLICATION VERIFICATION
+    console.log('╔════════════════════════════════════════════════════════════')
+    console.log('║ [DEDUPLICATION VERIFICATION] About to send to Meta')
+    console.log('║ event_id:', eventId)
+    console.log('║ event_name:', event_name || 'Lead')
+    console.log('║ ⚠️  VERIFY: This event_id MUST match the Pixel eventID')
+    console.log('║ ⚠️  Check browser console for "[DEDUPLICATION]" logs')
+    console.log('╚════════════════════════════════════════════════════════════')
 
     // Send to Meta Conversions API
     if (ACCESS_TOKEN) {

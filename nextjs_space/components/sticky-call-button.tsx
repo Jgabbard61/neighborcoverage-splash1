@@ -131,8 +131,8 @@ export default function StickyCallButton({ phoneNumber, phoneLink }: StickyCallB
       const externalId = getExternalId()
       
       // Build user_data with all available parameters for maximum Event Match Quality
+      // IMPORTANT: event_id should NOT be in user_data - it's a separate field
       const userData: any = {
-        event_id: eventId,  // Same as browser event for deduplication
         external_id: externalId,
         fbc: fbc,
         fbp: fbp,
@@ -141,6 +141,12 @@ export default function StickyCallButton({ phoneNumber, phoneLink }: StickyCallB
       }
       
       // Enhanced logging with actual values (first few characters for verification)
+      console.log('[DEDUPLICATION] Client-side event tracking (sticky button):', {
+        event_id: eventId,
+        pixel_eventID: eventId,
+        api_event_id: eventId,
+        note: 'SAME event_id sent to BOTH Pixel and Conversion API for deduplication'
+      })
       console.log('[Conversion API] Sending enhanced user_data (sticky button):', {
         event_id: eventId,
         fbc: fbc ? `${fbc.substring(0, 15)}...` : null,
@@ -154,6 +160,7 @@ export default function StickyCallButton({ phoneNumber, phoneLink }: StickyCallB
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          event_id: eventId,  // TOP-LEVEL event_id for deduplication (NOT in user_data)
           event_name: 'Lead',
           event_source_url: window.location.href,
           user_data: userData,
@@ -168,7 +175,10 @@ export default function StickyCallButton({ phoneNumber, phoneLink }: StickyCallB
         })
       })
       .then(res => res.json())
-      .then(data => console.log('[Conversion API] success:', data))
+      .then(data => {
+        console.log('[Conversion API] success:', data)
+        console.log('[DEDUPLICATION] ✓ Conversion API sent with event_id:', eventId)
+      })
       .catch(err => console.error('[Conversion API] error:', err))
     }
   }
