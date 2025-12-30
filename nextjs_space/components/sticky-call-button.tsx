@@ -64,7 +64,7 @@ export default function StickyCallButton({ phoneNumber, phoneLink }: StickyCallB
     return () => window?.removeEventListener?.('scroll', handleScroll)
   }, [])
 
-  // GA4 + Meta Pixel Event Tracking for Sticky Mobile Button
+  // GA4 Event Tracking for Sticky Mobile Button - INTERNAL ANALYTICS ONLY
   const trackStickyButtonClick = () => {
     // CRITICAL: Only track on production domains
     if (typeof window !== 'undefined') {
@@ -77,7 +77,7 @@ export default function StickyCallButton({ phoneNumber, phoneLink }: StickyCallB
       }
     }
     
-    // GA4 Events
+    // GA4 Events - INTERNAL ANALYTICS ONLY
     if (typeof window !== 'undefined' && (window as any).gtag) {
       try {
         // Track CTA click
@@ -103,84 +103,22 @@ export default function StickyCallButton({ phoneNumber, phoneLink }: StickyCallB
       console.warn('[GA4] gtag not available')
     }
     
-    // Generate event_id for deduplication between browser and server
-    const eventId = generateEventId()
+    // ⚠️ META TRACKING REMOVED - DECEMBER 2025 FIX
+    // Meta "Lead" events were firing on BUTTON CLICK, not actual call completion.
+    // This caused 76% false positive rate (220 Meta events vs 53 actual Retreaver calls).
+    // 
+    // NEW TRACKING APPROACH:
+    // - Meta conversions now tracked ONLY via Retreaver webhook → /api/retreaver-webhook
+    // - Webhook fires when call connects and meets duration threshold (30+ seconds)
+    // - This ensures 100% accuracy: Meta conversions = actual qualified calls
+    // 
+    // Previous code removed:
+    // - fbq('track', 'Lead', ...) - Pixel event on click
+    // - fetch('/api/meta-conversion', ...) - Conversion API on click
+    // 
+    // See: /RETREAVER_INTEGRATION_GUIDE.md for new implementation details
     
-    // Meta Pixel Lead Event with event_id for deduplication
-    if (typeof window !== 'undefined' && (window as any).fbq) {
-      try {
-        (window as any).fbq('track', 'Lead', {
-          content_name: 'Phone Call Initiated',
-          content_category: 'auto_insurance',
-          value: 1.00,
-          currency: 'USD'
-        }, {
-          eventID: eventId  // For deduplication with Conversion API
-        })
-        console.log('[Meta Pixel] Lead event tracked (sticky button), eventID:', eventId)
-      } catch (error) {
-        console.error('[Meta Pixel] tracking error:', error)
-      }
-    } else {
-      console.warn('[Meta Pixel] fbq not available')
-    }
-    
-    // Send to Conversion API with ENHANCED customer data for Event Match Quality
-    if (typeof window !== 'undefined') {
-      const { fbc, fbp } = getFacebookCookies()
-      const externalId = getExternalId()
-      
-      // Build user_data with all available parameters for maximum Event Match Quality
-      // IMPORTANT: event_id should NOT be in user_data - it's a separate field
-      const userData: any = {
-        external_id: externalId,
-        fbc: fbc,
-        fbp: fbp,
-        phone: '+18666499062',  // E.164 format: +1 (country code) + 8666499062
-        country: 'us',  // United States
-      }
-      
-      // Enhanced logging with actual values (first few characters for verification)
-      console.log('[DEDUPLICATION] Client-side event tracking (sticky button):', {
-        event_id: eventId,
-        pixel_eventID: eventId,
-        api_event_id: eventId,
-        note: 'SAME event_id sent to BOTH Pixel and Conversion API for deduplication'
-      })
-      console.log('[Conversion API] Sending enhanced user_data (sticky button):', {
-        event_id: eventId,
-        fbc: fbc ? `${fbc.substring(0, 15)}...` : null,
-        fbp: fbp ? `${fbp.substring(0, 15)}...` : null,
-        external_id: externalId,
-        phone: '+18666499062 (will be hashed server-side)',
-        country: 'us',
-      })
-      
-      fetch('/api/meta-conversion', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          event_id: eventId,  // TOP-LEVEL event_id for deduplication (NOT in user_data)
-          event_name: 'Lead',
-          event_source_url: window.location.href,
-          user_data: userData,
-          custom_data: {
-            content_name: 'Phone Call Initiated',
-            content_category: 'auto_insurance',
-            cta_location: 'sticky_mobile_button',
-            phone_number: phoneNumber,
-            value: 1.00,
-            currency: 'USD'
-          }
-        })
-      })
-      .then(res => res.json())
-      .then(data => {
-        console.log('[Conversion API] success:', data)
-        console.log('[DEDUPLICATION] ✓ Conversion API sent with event_id:', eventId)
-      })
-      .catch(err => console.error('[Conversion API] error:', err))
-    }
+    console.log('[Meta Tracking] Mobile button click events no longer tracked - using Retreaver webhook for qualified calls only')
   }
 
   return (
