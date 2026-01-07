@@ -4,7 +4,6 @@ import crypto from 'crypto'
 // Meta Conversions API Configuration
 const PIXEL_ID = '1884617578809782'
 const ACCESS_TOKEN = process.env.META_CONVERSION_API_TOKEN || ''
-const WEBHOOK_SECRET = process.env.RETREAVER_WEBHOOK_SECRET || ''
 
 // Meta Conversions API Endpoint
 const API_URL = `https://graph.facebook.com/v18.0/${PIXEL_ID}/events`
@@ -34,38 +33,36 @@ function generateEventId(): string {
   return crypto.randomBytes(16).toString('hex')
 }
 
-// Verify webhook signature for security
-function verifyWebhookSignature(payload: string, signature: string): boolean {
-  if (!WEBHOOK_SECRET) {
-    console.warn('[Retreaver Webhook] No webhook secret configured - skipping verification')
-    return true // Allow in development/testing
-  }
-  
-  const expectedSignature = crypto
-    .createHmac('sha256', WEBHOOK_SECRET)
-    .update(payload)
-    .digest('hex')
-  
-  return crypto.timingSafeEqual(
-    Buffer.from(signature),
-    Buffer.from(expectedSignature)
-  )
+// Health check endpoint
+export async function POST(request: NextRequest) {
+  return NextResponse.json({
+    status: 'ok',
+    message: 'Retreaver webhook endpoint ready',
+    min_call_duration: MIN_CALL_DURATION,
+    note: 'Use GET method for Retreaver webhooks'
+  })
 }
 
-export async function POST(request: NextRequest) {
+// Main webhook handler - Retreaver uses GET for "If call reached a buyer" trigger
+export async function GET(request: NextRequest) {
   try {
-    // Get raw body for signature verification
-    const rawBody = await request.text()
-    const signature = request.headers.get('x-retreaver-signature') || ''
+    // Extract query parameters from URL
+    const { searchParams } = new URL(request.url)
     
-    // Verify webhook signature
-    if (WEBHOOK_SECRET && !verifyWebhookSignature(rawBody, signature)) {
-      console.error('[Retreaver Webhook] Invalid signature')
-      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
+    // Parse Retreaver data from query parameters
+    const payload = {
+      call_id: searchParams.get('call_id') || searchParams.get('id'),
+      call_duration: parseInt(searchParams.get('call_duration') || searchParams.get('duration') || '0'),
+      call_status: searchParams.get('call_status') || searchParams.get('status') || 'completed',
+      caller_number: searchParams.get('caller_number') || searchParams.get('caller') || searchParams.get('ani'),
+      caller_city: searchParams.get('caller_city') || searchParams.get('city'),
+      caller_state: searchParams.get('caller_state') || searchParams.get('state'),
+      caller_zip: searchParams.get('caller_zip') || searchParams.get('zip'),
+      caller_country: searchParams.get('caller_country') || searchParams.get('country') || 'US',
+      call_timestamp: searchParams.get('call_timestamp') || searchParams.get('timestamp') || new Date().toISOString(),
+      campaign_id: searchParams.get('campaign_id') || searchParams.get('campaign'),
+      campaign_name: searchParams.get('campaign_name'),
     }
-    
-    // Parse webhook payload
-    const payload = JSON.parse(rawBody)
     
     console.log('╔════════════════════════════════════════════════════════════')
     console.log('║ [Retreaver Webhook] Received call data')

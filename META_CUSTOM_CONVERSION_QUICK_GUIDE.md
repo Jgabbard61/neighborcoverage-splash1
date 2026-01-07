@@ -15,7 +15,9 @@
 
 ## ⚠️ What You Need to Complete: **Rules Section**
 
-**The "Rules" section is OPTIONAL.** Here are your 3 options:
+**UPDATE:** Since you're using "Call conversion location" (not splash page), button clicks DON'T fire "Lead" events. **ALL "Lead" events = from webhook.**
+
+**This means: Leave rules BLANK (simplest approach).**
 
 ---
 
