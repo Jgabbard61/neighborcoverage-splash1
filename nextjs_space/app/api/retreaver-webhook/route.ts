@@ -246,13 +246,4 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Health check endpoint
-export async function GET(request: NextRequest) {
-  return NextResponse.json({
-    status: 'ok',
-    endpoint: 'Retreaver Webhook for Qualified Call Tracking',
-    min_call_duration: MIN_CALL_DURATION,
-    webhook_secret_configured: !!WEBHOOK_SECRET,
-    meta_token_configured: !!ACCESS_TOKEN,
-  })
-}
+
