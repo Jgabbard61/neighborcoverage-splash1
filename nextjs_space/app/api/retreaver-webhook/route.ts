@@ -10,7 +10,8 @@ const WEBHOOK_SECRET = process.env.RETREAVER_WEBHOOK_SECRET || ''
 const API_URL = `https://graph.facebook.com/v18.0/${PIXEL_ID}/events`
 
 // Minimum call duration to qualify as a conversion (in seconds)
-const MIN_CALL_DURATION = 30
+// Buyer requirement: 160+ seconds for payment
+const MIN_CALL_DURATION = 160
 
 // Hash function for user data (required by Meta for privacy)
 function hashData(data: string, type: 'email' | 'phone' | 'text' | 'country' = 'text'): string {
