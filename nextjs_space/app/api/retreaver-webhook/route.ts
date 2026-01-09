@@ -9,8 +9,8 @@ const ACCESS_TOKEN = process.env.META_CONVERSION_API_TOKEN || ''
 const API_URL = `https://graph.facebook.com/v18.0/${PIXEL_ID}/events`
 
 // Minimum call duration to qualify as a conversion (in seconds)
-// Buyer requirement: 160+ seconds for payment
-const MIN_CALL_DURATION = 160
+// Buyer requirement: 140+ seconds for payment
+const MIN_CALL_DURATION = 140
 
 // Hash function for user data (required by Meta for privacy)
 function hashData(data: string, type: 'email' | 'phone' | 'text' | 'country' = 'text'): string {
