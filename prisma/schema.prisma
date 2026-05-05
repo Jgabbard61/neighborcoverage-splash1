@@ -1,9 +1,41 @@
 generator client {
-  provider = "prisma-client-js"
-  binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+    provider = "prisma-client-js"
+    binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+    output = "/home/ubuntu/neighborcoverage-splash/nextjs_space/node_modules/.prisma/client"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model WebhookEvent {
+  id            String   @id @default(cuid())
+  eventType     String
+  callId        String?
+  callerNumber  String?
+  duration      Int?
+  payload       String?  @db.Text
+  processedAt   DateTime?
+  conversionFired Boolean @default(false)
+  createdAt     DateTime @default(now())
+
+  @@index([eventType])
+  @@index([callId])
+  @@index([createdAt])
+}
+
+model ConversionEvent {
+  id            String   @id @default(cuid())
+  eventName     String
+  eventId       String   @unique
+  source        String
+  callId        String?
+  metaResponse  String?  @db.Text
+  success       Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  @@index([eventName])
+  @@index([callId])
+  @@index([createdAt])
 }

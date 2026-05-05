@@ -2,24 +2,54 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  /* Brand Colors */
-  --navy-primary: #1E3A8A;
-  --orange-accent: #F97316;
-  --orange-hover: #EA580C;
-  
-  /* Neutrals */
-  --light-bg: #F9FAFB;
-  --white: #FFFFFF;
-  --dark-gray: #374151;
-  --medium-gray: #6B7280;
-  --light-gray: #D1D5DB;
+@layer base {
+  :root {
+    --background: 0 0% 98%;
+    --foreground: 220 20% 20%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 20% 20%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 20%;
+    --primary: 224 73% 33%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 220 14.3% 95.9%;
+    --muted-foreground: 220 8.9% 46.1%;
+    --accent: 24 95% 53%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 224 73% 33%;
+    --radius: 0.625rem;
+    --radius-sm: calc(0.625rem - 4px);
+    --radius-lg: calc(0.625rem + 4px);
+    --radius-full: 9999px;
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    --spacing-2xl: 48px;
+    --spacing-3xl: 64px;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.03), 0 1px 3px 0 rgb(0 0 0 / 0.06);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+    --duration-fast: 150ms;
+    --duration-normal: 250ms;
+    --duration-slow: 350ms;
+    --chart-1: 224 73% 33%;
+    --chart-2: 24 95% 53%;
+    --chart-3: 173 58% 39%;
+    --chart-4: 197 37% 24%;
+    --chart-5: 43 74% 66%;
+  }
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+[data-hydration-error] {
+  display: none !important;
 }
 
 html {
@@ -27,106 +57,17 @@ html {
 }
 
 body {
-  background-color: var(--light-bg);
-  color: var(--dark-gray);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Typography */
-h1, h2, h3, h4, h5, h6 {
-  font-weight: 700;
-  line-height: 1.2;
-  color: var(--navy-primary);
+@keyframes pulse-ring {
+  0% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.05); opacity: 0.4; }
+  100% { transform: scale(1); opacity: 0.8; }
 }
 
-h1 {
-  font-size: clamp(32px, 5vw, 48px);
-}
-
-h2 {
-  font-size: clamp(24px, 4vw, 36px);
-}
-
-h3 {
-  font-size: clamp(20px, 3vw, 28px);
-}
-
-p {
-  line-height: 1.7;
-}
-
-/* Utility Classes */
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px;
-}
-
-@media (max-width: 768px) {
-  .container {
-    padding: 0 16px;
-  }
-}
-
-/* Button Styles */
-.cta-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  background-color: var(--orange-accent);
-  color: var(--white);
-  padding: 18px 32px;
-  font-size: 18px;
-  font-weight: 600;
-  border-radius: 8px;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 6px rgba(249, 115, 22, 0.3);
-  border: none;
-  cursor: pointer;
-  min-width: 280px;
-  text-align: center;
-}
-
-.cta-button:hover {
-  background-color: var(--orange-hover);
-  box-shadow: 0 6px 12px rgba(249, 115, 22, 0.4);
-  transform: translateY(-2px);
-}
-
-.cta-button:active {
-  transform: translateY(0);
-}
-
-@media (max-width: 768px) {
-  .cta-button {
-    font-size: 16px;
-    padding: 16px 24px;
-    min-width: 100%;
-  }
-}
-
-/* Animations */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.fade-in-up {
-  animation: fadeInUp 0.8s ease forwards;
-}
-
-/* Smooth transitions */
-.smooth-transition {
-  transition: all 0.3s ease;
+.animate-pulse-ring {
+  animation: pulse-ring 2s ease-in-out infinite;
 }

@@ -1,92 +1,65 @@
-import { NextRequest, NextResponse } from 'next/server'
-import crypto from 'crypto'
+export const dynamic = 'force-dynamic';
 
-// Meta Conversions API Configuration
-const PIXEL_ID = '1884617578809782'
-const ACCESS_TOKEN = process.env.META_CONVERSION_API_TOKEN || ''
-
-// Meta Conversions API Endpoint
-const API_URL = `https://graph.facebook.com/v18.0/${PIXEL_ID}/events`
-
-// Hash function for user data (required by Meta for privacy)
-function hashData(data: string): string {
-  return crypto.createHash('sha256').update(data.toLowerCase().trim()).digest('hex')
-}
-
-// Generate event ID for deduplication (browser + server events with same ID = counted once)
-function generateEventId(): string {
-  return crypto.randomBytes(16).toString('hex')
-}
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { sendConversionEvent } from '@/lib/meta-conversions-api';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { event_name, event_source_url, custom_data } = body
+    const body = await request?.json?.().catch(() => ({}));
+    const {
+      eventName = 'InitiateCall',
+      eventId = '',
+      ctaLocation = '',
+      sourceUrl = '',
+      userAgent = '',
+      fbc = '',
+      fbp = '',
+    } = body ?? {};
 
-    // Get client IP and user agent for better tracking
-    const clientIp = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || ''
-    const userAgent = request.headers.get('user-agent') || ''
-
-    // Generate event ID (should ideally come from client for deduplication)
-    const eventId = generateEventId()
-
-    // Prepare event data for Meta Conversions API
-    const eventData = {
-      data: [
-        {
-          event_name: event_name || 'Lead',
-          event_time: Math.floor(Date.now() / 1000),
-          event_id: eventId,
-          event_source_url: event_source_url || '',
-          action_source: 'website',
-          user_data: {
-            client_ip_address: clientIp.split(',')[0].trim(),
-            client_user_agent: userAgent,
-            // Add hashed email/phone if you collect them in a form
-            // em: hashData('user@example.com'),
-            // ph: hashData('+15551234567'),
-          },
-          custom_data: custom_data || {},
-        },
-      ],
-      access_token: ACCESS_TOKEN,
+    if (!eventId) {
+      return NextResponse.json({ error: 'Missing eventId' }, { status: 400 });
     }
 
-    // Send to Meta Conversions API
-    if (ACCESS_TOKEN) {
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(eventData),
-      })
+    // Check for duplicate
+    const existing = await prisma.conversionEvent.findUnique({
+      where: { eventId },
+    }).catch(() => null);
 
-      const result = await response.json()
-
-      if (!response.ok) {
-        console.error('Meta Conversions API error:', result)
-        return NextResponse.json(
-          { error: 'Failed to send event to Meta', details: result },
-          { status: 500 }
-        )
-      }
-
-      return NextResponse.json({ success: true, event_id: eventId, meta_response: result })
-    } else {
-      // If no access token, still return success for testing
-      console.warn('META_CONVERSION_API_TOKEN not configured, skipping server-side tracking')
-      return NextResponse.json({ 
-        success: true, 
-        event_id: eventId, 
-        note: 'Conversion API token not configured' 
-      })
+    if (existing) {
+      return NextResponse.json({ status: 'duplicate', eventId });
     }
-  } catch (error) {
-    console.error('Conversion API error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error', details: error },
-      { status: 500 }
-    )
+
+    const clientIp = request?.headers?.get?.('x-forwarded-for')?.split(',')?.[0]?.trim?.() ?? 
+                     request?.headers?.get?.('x-real-ip') ?? '';
+
+    const result = await sendConversionEvent({
+      eventName,
+      eventId,
+      sourceUrl,
+      userAgent,
+      clientIpAddress: clientIp,
+      fbc,
+      fbp,
+      customData: { cta_location: ctaLocation },
+    });
+
+    // Store in database
+    await prisma.conversionEvent.create({
+      data: {
+        eventName,
+        eventId,
+        source: 'client',
+        metaResponse: JSON.stringify(result?.response ?? {}),
+        success: result?.success ?? false,
+      },
+    }).catch((err: any) => {
+      console.error('[meta-conversion] DB save error:', err?.message ?? err);
+    });
+
+    return NextResponse.json({ status: 'ok', eventId, success: result?.success });
+  } catch (err: any) {
+    console.error('[meta-conversion] Error:', err?.message ?? err);
+    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }

@@ -1,0 +1,2 @@
+find: paths must precede expression: `STYLE_GUIDE.md'
+find: possible unquoted pattern after predicate `-name'?

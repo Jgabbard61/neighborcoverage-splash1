@@ -1,0 +1,29 @@
+  ▲ Next.js 14.2.28
+  - Local:        http://localhost:3000
+  - Environments: .env
+  - Experiments (use with caution):
+    · outputFileTracingRoot
+
+ ✓ Starting...
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+ ✓ Ready in 1394ms
+ ○ Compiling / ...
+ ✓ Compiled / in 4.2s (1182 modules)
+ GET / 200 in 4431ms
+ ✓ Compiled in 428ms (589 modules)
+ ✓ Compiled in 352ms (1163 modules)
+ GET / 200 in 94ms
+ ✓ Compiled /api/trackdrive-webhook in 298ms (619 modules)
+ GET /api/trackdrive-webhook 200 in 421ms
+[trackdrive-webhook] Received: Call Ended, callId: test123, duration: 150s
+[trackdrive-webhook] Firing QualifiedCall conversion for call test123 (150s >= 120s)
+[Meta CAPI] Skipped — missing or placeholder credentials. Event: QualifiedCall ID: qc_test123_1777948018662
+ POST /api/trackdrive-webhook 200 in 112ms
+ ✓ Compiled /api/meta-conversion in 156ms (621 modules)
+[Meta CAPI] Skipped — missing or placeholder credentials. Event: InitiateCall ID: test_123
+ POST /api/meta-conversion 200 in 214ms
+[?25h
