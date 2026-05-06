@@ -4,7 +4,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { sendConversionEvent } from '@/lib/meta-conversions-api';
 
-const VALID_EVENT_TYPES = ['Lead Converted', 'New Call', 'Call Ringing', 'Call Ended', 'Call Forwarded'];
+// In-memory dedup fallback when DB is not available
+const firedConversions = new Set<string>();
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,10 +19,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Optional signature verification
-    const signature = request?.headers?.get?.('x-trackdrive-signature') ?? '';
+    const signature = request?.headers?.get?.('x-trackdrive-signature') ?? 
+                     request?.headers?.get?.('x-webhook-secret') ?? '';
     const webhookSecret = process.env.TRACKDRIVE_WEBHOOK_SECRET ?? '';
     if (webhookSecret && webhookSecret !== 'YOUR_TRACKDRIVE_WEBHOOK_SECRET' && signature) {
-      // Basic signature check - TrackDrive may use HMAC or token-based
       if (signature !== webhookSecret) {
         console.warn('[trackdrive-webhook] Signature mismatch');
         return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
@@ -35,20 +36,24 @@ export async function POST(request: NextRequest) {
 
     console.log(`[trackdrive-webhook] Received: ${eventType}, callId: ${callId}, duration: ${duration}s`);
 
-    // Store webhook event
-    const webhookEvent = await prisma.webhookEvent.create({
-      data: {
-        eventType: eventType || 'unknown',
-        callId: callId || null,
-        callerNumber: callerNumber || null,
-        duration,
-        payload: rawBody?.substring?.(0, 5000) ?? '',
-        processedAt: new Date(),
-      },
-    }).catch((err: any) => {
-      console.error('[trackdrive-webhook] DB save error:', err?.message ?? err);
-      return null;
-    });
+    // Store webhook event in DB if available
+    let webhookEventId: string | null = null;
+    if (prisma) {
+      const webhookEvent = await prisma.webhookEvent.create({
+        data: {
+          eventType: eventType || 'unknown',
+          callId: callId || null,
+          callerNumber: callerNumber || null,
+          duration,
+          payload: rawBody?.substring?.(0, 5000) ?? '',
+          processedAt: new Date(),
+        },
+      }).catch((err: any) => {
+        console.error('[trackdrive-webhook] DB save error:', err?.message ?? err);
+        return null;
+      });
+      webhookEventId = webhookEvent?.id ?? null;
+    }
 
     // Check if this is a qualifying call
     const threshold = parseInt(process.env.QUALIFIED_CALL_DURATION_THRESHOLD ?? '120', 10) || 120;
@@ -58,15 +63,23 @@ export async function POST(request: NextRequest) {
     );
 
     if (isQualified && callId) {
-      // Check dedup - don't fire conversion twice for same call
-      const existingConversion = await prisma.conversionEvent.findFirst({
-        where: { callId, eventName: 'QualifiedCall' },
-      }).catch(() => null);
+      // Dedup check - DB first, fallback to in-memory
+      const dedupKey = `qc_${callId}`;
+      let isDuplicate = false;
 
-      if (!existingConversion) {
+      if (prisma) {
+        const existing = await prisma.conversionEvent.findFirst({
+          where: { callId, eventName: 'QualifiedCall' },
+        }).catch(() => null);
+        isDuplicate = !!existing;
+      } else {
+        isDuplicate = firedConversions.has(dedupKey);
+      }
+
+      if (!isDuplicate) {
         const eventId = `qc_${callId}_${Date.now()}`;
         
-        console.log(`[trackdrive-webhook] Firing QualifiedCall conversion for call ${callId} (${duration}s >= ${threshold}s)`);
+        console.log(`[trackdrive-webhook] Firing QualifiedCall for call ${callId} (${duration}s >= ${threshold}s)`);
 
         const clientIp = request?.headers?.get?.('x-forwarded-for')?.split(',')?.[0]?.trim?.() ?? '';
 
@@ -82,33 +95,33 @@ export async function POST(request: NextRequest) {
           },
         });
 
-        // Store conversion record
-        await prisma.conversionEvent.create({
-          data: {
-            eventName: 'QualifiedCall',
-            eventId,
-            source: 'trackdrive_webhook',
-            callId,
-            metaResponse: JSON.stringify(result?.response ?? {}),
-            success: result?.success ?? false,
-          },
-        }).catch((err: any) => {
-          console.error('[trackdrive-webhook] Conversion DB save error:', err?.message ?? err);
-        });
+        // Store conversion
+        if (prisma) {
+          await prisma.conversionEvent.create({
+            data: {
+              eventName: 'QualifiedCall',
+              eventId,
+              source: 'trackdrive_webhook',
+              callId,
+              metaResponse: JSON.stringify(result?.response ?? {}),
+              success: result?.success ?? false,
+            },
+          }).catch((err: any) => {
+            console.error('[trackdrive-webhook] Conversion DB save error:', err?.message ?? err);
+          });
 
-        // Update webhook event
-        if (webhookEvent?.id) {
-          await prisma.webhookEvent.update({
-            where: { id: webhookEvent.id },
-            data: { conversionFired: true },
-          }).catch(() => {});
+          if (webhookEventId) {
+            await prisma.webhookEvent.update({
+              where: { id: webhookEventId },
+              data: { conversionFired: true },
+            }).catch(() => {});
+          }
+        } else {
+          firedConversions.add(dedupKey);
         }
 
         return NextResponse.json({ 
-          status: 'ok', 
-          qualified: true, 
-          conversionFired: true,
-          eventId,
+          status: 'ok', qualified: true, conversionFired: true, eventId,
         });
       } else {
         console.log(`[trackdrive-webhook] Duplicate conversion skipped for call ${callId}`);
@@ -123,7 +136,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Health check
 export async function GET() {
   return NextResponse.json({ status: 'ok', endpoint: 'trackdrive-webhook' });
 }

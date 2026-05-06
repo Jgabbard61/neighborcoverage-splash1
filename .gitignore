@@ -1,0 +1,30 @@
+# dependencies
+node_modules/
+.yarn/
+
+# build
+.next/
+.build/
+out/
+dist/
+build/
+
+# env
+.env
+.env.local
+.env.production
+.env.development
+
+# logs
+.logs/
+*.log
+
+# system
+.DS_Store
+.abacus.donotdelete
+
+# deploy
+.deploy/
+
+# prisma
+prisma/migrations/
