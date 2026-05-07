@@ -31,7 +31,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <script src="https://apps.abacus.ai/chatllm/appllm-lib.js" />
-        {/* Meta Pixel Code - Hardcoded for Event Setup Tool compatibility */}
+        {/* Meta Pixel Code */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -45,6 +45,18 @@ s.parentNode.insertBefore(t,s)}(window, document,'script',
 'https://connect.facebook.net/en_US/fbevents.js');
 fbq('init', '1469359514924643');
 fbq('track', 'PageView');
+
+// Track InitiateCall on ALL tel: link clicks
+document.addEventListener('click', function(e) {
+  var link = e.target.closest('a[href^="tel:"]');
+  if (link && typeof fbq === 'function') {
+    fbq('track', 'Contact');
+    fbq('trackCustom', 'InitiateCall', {
+      cta_location: link.getAttribute('data-cta-location') || 'unknown',
+      timestamp: new Date().toISOString()
+    });
+  }
+}, true);
 `,
           }}
         />
