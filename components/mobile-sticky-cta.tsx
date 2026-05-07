@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { Phone } from 'lucide-react';
-import { trackInitiateCall } from '@/lib/meta-pixel';
 
 const PHONE_NUMBER = process.env.NEXT_PUBLIC_PHONE_NUMBER ?? '000-000-0000';
 const PHONE_TEL = `tel:${(PHONE_NUMBER ?? '').replace?.(/[^0-9]/g, '') ?? ''}`;
@@ -18,12 +17,6 @@ export function MobileStickyCTA() {
     return () => window?.removeEventListener?.('scroll', handleScroll);
   }, []);
 
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    trackInitiateCall('sticky_mobile_button');
-    setTimeout(() => { window.location.href = PHONE_TEL; }, 300);
-  };
-
   return (
     <div
       className={`
@@ -35,7 +28,6 @@ export function MobileStickyCTA() {
       <div className="bg-gradient-to-r from-[#F97316] to-[#FB923C] px-4 py-3 shadow-[0_-4px_20px_rgba(0,0,0,0.15)]">
         <a
           href={PHONE_TEL}
-          onClick={handleClick}
           className="flex items-center justify-center gap-3 text-white font-bold text-lg"
         >
           <Phone className="w-5 h-5 animate-pulse-ring" />

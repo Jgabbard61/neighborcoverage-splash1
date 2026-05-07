@@ -4,7 +4,6 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { Toaster } from '@/components/ui/sonner';
 import { ChunkLoadErrorHandler } from '@/components/chunk-load-error-handler';
-import { MetaPixelScript } from '@/components/meta-pixel-script';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -32,7 +31,33 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <script src="https://apps.abacus.ai/chatllm/appllm-lib.js" />
-        <MetaPixelScript />
+        {/* Meta Pixel Code - Hardcoded for Event Setup Tool compatibility */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1469359514924643');
+fbq('track', 'PageView');
+`,
+          }}
+        />
+        <noscript>
+          <img
+            height="1"
+            width="1"
+            style={{ display: 'none' }}
+            src="https://www.facebook.com/tr?id=1469359514924643&ev=PageView&noscript=1"
+            alt=""
+          />
+        </noscript>
+        {/* End Meta Pixel Code */}
       </head>
       <body className={`${inter.variable} font-sans bg-[#F9FAFB] text-[#374151] antialiased`}>
         {children}
