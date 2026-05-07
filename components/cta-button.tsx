@@ -23,8 +23,17 @@ export function CTAButton({
   showIcon = true,
   label,
 }: CTAButtonProps) {
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    // Prevent immediate tel: navigation so tracking fires first
+    e.preventDefault();
+    
+    // Fire the tracking event
     trackInitiateCall(location);
+    
+    // Give the pixel 300ms to send, then open the phone link
+    setTimeout(() => {
+      window.location.href = PHONE_TEL;
+    }, 300);
   };
 
   const sizeClasses: Record<string, string> = {

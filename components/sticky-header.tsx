@@ -3,7 +3,10 @@
 import { useState, useEffect } from 'react';
 import { Phone, Shield } from 'lucide-react';
 import { CTAButton } from './cta-button';
+import { trackInitiateCall } from '@/lib/meta-pixel';
 import Image from 'next/image';
+
+const PHONE_TEL = `tel:${(process.env.NEXT_PUBLIC_PHONE_NUMBER ?? '000-000-0000').replace?.(/[^0-9]/g, '') ?? ''}`;
 
 export function StickyHeader() {
   const [scrolled, setScrolled] = useState(false);
@@ -48,7 +51,12 @@ export function StickyHeader() {
           className="hidden sm:inline-flex"
         />
         <a
-          href={`tel:${(process.env.NEXT_PUBLIC_PHONE_NUMBER ?? '000-000-0000').replace?.(/[^0-9]/g, '') ?? ''}`}
+          href={PHONE_TEL}
+          onClick={(e) => {
+            e.preventDefault();
+            trackInitiateCall('header_mobile_icon');
+            setTimeout(() => { window.location.href = PHONE_TEL; }, 300);
+          }}
           className="sm:hidden bg-[#F97316] text-white p-2.5 rounded-full shadow-lg hover:bg-[#EA580C] transition-colors"
           aria-label="Call Now"
         >

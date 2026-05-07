@@ -18,8 +18,10 @@ export function MobileStickyCTA() {
     return () => window?.removeEventListener?.('scroll', handleScroll);
   }, []);
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
     trackInitiateCall('sticky_mobile_button');
+    setTimeout(() => { window.location.href = PHONE_TEL; }, 300);
   };
 
   return (
