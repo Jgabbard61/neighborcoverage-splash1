@@ -15,7 +15,7 @@ const steps = [
     icon: MessageSquare,
     step: '2',
     title: 'Share Your Needs',
-    description: 'Tell us about your vehicle and coverage preferences',
+    description: 'Tell us about your home, vehicle, and coverage preferences',
   },
   {
     icon: PiggyBank,

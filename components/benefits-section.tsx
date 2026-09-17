@@ -41,7 +41,8 @@ export function BenefitsSection() {
             Why Choose NeighborCoverage?
           </h2>
           <p className="text-[#6B7280] text-lg max-w-2xl mx-auto">
-            Simple solutions with neighborly support every step of the way.
+            One trusted neighbor for both your auto and home coverage — simple solutions with
+            neighborly support every step of the way.
           </p>
         </motion.div>
 

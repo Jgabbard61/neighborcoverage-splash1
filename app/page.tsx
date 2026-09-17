@@ -1,6 +1,8 @@
 import { StickyHeader } from '@/components/sticky-header';
 import { HeroSection } from '@/components/hero-section';
 import { BenefitsSection } from '@/components/benefits-section';
+import { AutoInsuranceSection } from '@/components/auto-insurance-section';
+import { HomeInsuranceSection } from '@/components/home-insurance-section';
 import { MiddleCTASection } from '@/components/middle-cta-section';
 import { TrustSection } from '@/components/trust-section';
 import { HowItWorksSection } from '@/components/how-it-works-section';
@@ -14,6 +16,8 @@ export default function Home() {
       <StickyHeader />
       <HeroSection />
       <BenefitsSection />
+      <AutoInsuranceSection />
+      <HomeInsuranceSection />
       <MiddleCTASection />
       <TrustSection />
       <HowItWorksSection />

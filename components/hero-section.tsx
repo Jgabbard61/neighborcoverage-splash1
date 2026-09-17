@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Shield, Lock, Star, CheckCircle } from 'lucide-react';
+import { Shield, Lock, Star, CheckCircle, Car, Home } from 'lucide-react';
 import { CTAButton } from './cta-button';
 import Image from 'next/image';
 
@@ -32,13 +32,24 @@ export function HeroSection() {
             </div>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#1E3A8A] leading-[1.1] tracking-tight mb-6">
-              Coverage You Can{' '}
+              Auto &amp; Home Coverage You Can{' '}
               <span className="text-[#F97316]">Trust</span>, Right Next Door
             </h1>
 
             <p className="text-lg md:text-xl text-[#374151] mb-4 leading-relaxed max-w-lg">
-              Compare auto insurance rates and get personalized quotes in minutes.
+              Compare auto <span className="font-semibold text-[#1E3A8A]">and</span> home insurance
+              rates and get personalized quotes in minutes.
             </p>
+
+            {/* Product pills */}
+            <div className="flex flex-wrap gap-3 mb-6">
+              <span className="inline-flex items-center gap-2 bg-orange-50 text-[#F97316] px-4 py-2 rounded-full text-sm font-bold">
+                <Car className="w-4 h-4" /> Auto Insurance
+              </span>
+              <span className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-2 rounded-full text-sm font-bold">
+                <Home className="w-4 h-4" /> Home Insurance
+              </span>
+            </div>
 
             <div className="flex items-center gap-2 text-[#1E3A8A] font-medium mb-8">
               <CheckCircle className="w-5 h-5 text-[#F97316]" />
@@ -76,16 +87,37 @@ export function HeroSection() {
             transition={{ duration: 0.7, delay: 0.2 }}
             className="order-1 md:order-2"
           >
-            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl">
-              <Image
-                src="https://cdn.abacus.ai/images/b7caeb29-27b1-4f28-bca5-78fd8c9faa3f.png"
-                alt="Happy family standing next to their car, smiling with confidence"
-                fill
-                className="object-cover"
-                priority
-                sizes="(max-width: 768px) 100vw, 50vw"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#1E3A8A]/20 to-transparent" />
+            <div className="grid grid-cols-2 gap-3 md:gap-4">
+              {/* Auto */}
+              <div className="relative aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl">
+                <Image
+                  src="https://cdn.abacus.ai/images/b7caeb29-27b1-4f28-bca5-78fd8c9faa3f.png"
+                  alt="Happy family standing next to their car, smiling with confidence"
+                  fill
+                  className="object-cover"
+                  priority
+                  sizes="(max-width: 768px) 50vw, 25vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#1E3A8A]/50 to-transparent" />
+                <div className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 bg-[#F97316] text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-lg">
+                  <Car className="w-3.5 h-3.5" /> Auto
+                </div>
+              </div>
+              {/* Home */}
+              <div className="relative aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl mt-6 md:mt-8">
+                <Image
+                  src="/images/home-hero-family.jpg"
+                  alt="Happy family celebrating outside their new home"
+                  fill
+                  className="object-cover"
+                  priority
+                  sizes="(max-width: 768px) 50vw, 25vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-emerald-900/50 to-transparent" />
+                <div className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 bg-emerald-600 text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-lg">
+                  <Home className="w-3.5 h-3.5" /> Home
+                </div>
+              </div>
             </div>
           </motion.div>
         </div>

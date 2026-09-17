@@ -24,7 +24,7 @@ export function TrustSection() {
           className="text-center mb-12"
         >
           <h2 className="text-3xl md:text-4xl font-bold text-[#1E3A8A] tracking-tight mb-3">
-            Trusted by Thousands of Drivers
+            Trusted by Thousands of Drivers &amp; Homeowners
           </h2>
         </motion.div>
 
