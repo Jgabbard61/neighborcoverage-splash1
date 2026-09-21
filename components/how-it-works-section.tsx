@@ -15,13 +15,13 @@ const steps = [
     icon: MessageSquare,
     step: '2',
     title: 'Share Your Needs',
-    description: 'Tell us about your home, vehicle, and coverage preferences',
+    description: 'Tell us what you need — insurance coverage or a home project',
   },
   {
     icon: PiggyBank,
     step: '3',
     title: 'Compare & Save',
-    description: 'Get personalized quotes from top carriers',
+    description: 'Get matched with the best carrier or vetted local pro',
   },
 ];
 

@@ -8,19 +8,19 @@ const benefits = [
   {
     icon: Zap,
     title: 'Fast & Easy',
-    description: 'Get connected to a licensed advisor in seconds',
+    description: 'Get connected to the right advisor or pro in seconds',
     color: 'bg-orange-50 text-[#F97316]',
   },
   {
     icon: BarChart3,
     title: 'Compare Options',
-    description: 'Access multiple carriers to find your best rate',
+    description: 'Access multiple carriers and vetted providers to find your best value',
     color: 'bg-blue-50 text-[#1E3A8A]',
   },
   {
     icon: UserCheck,
     title: 'Expert Guidance',
-    description: 'Speak with experienced insurance professionals',
+    description: 'Speak with experienced, licensed professionals you can trust',
     color: 'bg-green-50 text-emerald-600',
   },
 ];
@@ -41,8 +41,8 @@ export function BenefitsSection() {
             Why Choose NeighborCoverage?
           </h2>
           <p className="text-[#6B7280] text-lg max-w-2xl mx-auto">
-            One trusted neighbor for both your auto and home coverage — simple solutions with
-            neighborly support every step of the way.
+            One trusted neighbor for all ten verticals — insurance and home services alike.
+            Simple solutions with neighborly support every step of the way.
           </p>
         </motion.div>
 

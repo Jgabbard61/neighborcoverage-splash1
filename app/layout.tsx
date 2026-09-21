@@ -9,15 +9,15 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata = {
   metadataBase: new URL(process.env.NEXTAUTH_URL ?? 'https://neighborcoverage.com'),
-  title: 'NeighborCoverage - Expert Advice, Neighborly Service | Compare Auto & Home Insurance Rates',
-  description: 'Your neighbor in protection. Connect with a licensed advisor at NeighborCoverage and discover auto and home insurance coverage that fits your needs and budget. Bundle and save. Expert advice, neighborly service. Call now!',
+  title: 'NeighborCoverage - One Neighbor, Total Coverage | Insurance & Home Services',
+  description: 'Your coverage umbrella. NeighborCoverage connects you with licensed advisors and vetted pros across auto, home, Medicare, and final expense insurance plus plumbing, roofing, HVAC, pest control, bathroom remodels, and window installs. Expert advice, neighborly service. Call now!',
   icons: {
     icon: '/favicon.svg',
     shortcut: '/favicon.svg',
   },
   openGraph: {
-    title: 'NeighborCoverage - Expert Advice, Neighborly Service',
-    description: 'Coverage you can trust, right next door. Connect with a licensed advisor and get personalized auto and home insurance quotes in minutes.',
+    title: 'NeighborCoverage - One Neighbor, Total Coverage',
+    description: 'Coverage you can trust, right next door. Insurance and home services under one trusted umbrella — get connected with licensed advisors and vetted pros in minutes.',
     images: ['/og-image.png'],
   },
 };

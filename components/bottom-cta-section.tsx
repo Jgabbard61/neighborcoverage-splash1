@@ -25,7 +25,7 @@ export function BottomCTASection() {
             Protecting What Matters
           </h2>
           <p className="text-white/90 text-lg md:text-xl mb-4 max-w-2xl mx-auto">
-            The Coverage Your Home & Auto Deserve, From Your Neighbors at NeighborCoverage
+            Insurance and home services under one trusted umbrella — from your neighbors at NeighborCoverage
           </p>
           <div className="flex items-center justify-center gap-2 text-white/80 mb-10">
             <CheckCircle className="w-5 h-5 text-[#F97316]" />
