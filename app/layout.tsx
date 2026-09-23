@@ -43,19 +43,77 @@ n.queue=[];t=b.createElement(e);t.async=!0;
 t.src=v;s=b.getElementsByTagName(e)[0];
 s.parentNode.insertBefore(t,s)}(window, document,'script',
 'https://connect.facebook.net/en_US/fbevents.js');
-fbq('init', '1469359514924643');
+fbq('init', '2466716013819414');
 fbq('track', 'PageView');
 
-// Track InitiateCall on ALL tel: link clicks
+// Helper: generate UUID
+function ncGenUUID() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+// Helper: read a cookie by name
+function ncGetCookie(name) {
+  var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+  return match ? decodeURIComponent(match[2]) : '';
+}
+
+// Capture fbclid from URL and store in _fbc cookie if not already set
+(function() {
+  try {
+    var params = new URLSearchParams(window.location.search);
+    var fbclid = params.get('fbclid');
+    if (fbclid && !ncGetCookie('_fbc')) {
+      var fbc = 'fb.1.' + Date.now() + '.' + fbclid;
+      document.cookie = '_fbc=' + encodeURIComponent(fbc) + '; path=/; max-age=7776000; SameSite=Lax';
+    }
+  } catch(e) {}
+})();
+
+// Track InitiateCall on tel: link clicks — with per-session deduplication
 document.addEventListener('click', function(e) {
   var link = e.target.closest('a[href^="tel:"]');
-  if (link && typeof fbq === 'function') {
-    fbq('track', 'Contact');
-    fbq('trackCustom', 'InitiateCall', {
-      cta_location: link.getAttribute('data-cta-location') || 'unknown',
-      timestamp: new Date().toISOString()
+  if (!link || typeof fbq !== 'function') return;
+
+  var telHref = link.getAttribute('href') || 'tel:unknown';
+  var sessionKey = 'nc_call_fired_' + telHref.replace(/[^0-9]/g, '');
+  var ctaLocation = link.getAttribute('data-cta-location') || 'unknown';
+
+  // Dedup: if we already fired for this number this session, skip
+  if (sessionStorage.getItem(sessionKey)) return;
+
+  // Generate a unique eventId for dedup across browser + CAPI
+  var eventId = ncGenUUID();
+  sessionStorage.setItem(sessionKey, eventId);
+
+  // Fire browser-side pixel events with eventID for dedup
+  fbq('track', 'Contact', { eventID: eventId });
+  fbq('trackCustom', 'InitiateCall', {
+    cta_location: ctaLocation,
+    eventID: eventId,
+    timestamp: new Date().toISOString()
+  });
+
+  // Also fire server-side CAPI via our Next.js API route (for dedup + better signal)
+  try {
+    fetch('/api/meta-conversion', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        eventName: 'InitiateCall',
+        eventId: eventId,
+        ctaLocation: ctaLocation,
+        sourceUrl: window.location.href,
+        userAgent: navigator.userAgent,
+        fbc: ncGetCookie('_fbc'),
+        fbp: ncGetCookie('_fbp')
+      }),
+      keepalive: true
     });
-  }
+  } catch(ex) {}
 }, true);
 `,
           }}
@@ -65,7 +123,7 @@ document.addEventListener('click', function(e) {
             height="1"
             width="1"
             style={{ display: 'none' }}
-            src="https://www.facebook.com/tr?id=1469359514924643&ev=PageView&noscript=1"
+            src="https://www.facebook.com/tr?id=2466716013819414&ev=PageView&noscript=1"
             alt=""
           />
         </noscript>
