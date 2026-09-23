@@ -32,6 +32,8 @@ export async function POST(request: NextRequest) {
     const duration = parseInt(String(body?.duration ?? body?.call_duration ?? body?.billable_duration ?? '0'), 10) || 0;
     const callerNumber = String(body?.caller_number ?? body?.from ?? body?.ani ?? body?.caller ?? '');
     const disposition = String(body?.disposition ?? body?.call_disposition ?? '');
+    // Inbound DID (the number that was called) — used to route HVAC-specific conversions
+    const did = String(body?.did ?? body?.dialed ?? body?.to ?? body?.dnis ?? body?.called_number ?? body?.target ?? '');
 
     console.log(`[moja-webhook] Received: event=${eventType}, callId=${callId}, duration=${duration}s, disposition=${disposition}`);
 
@@ -96,6 +98,41 @@ export async function POST(request: NextRequest) {
             source: 'moja',
           },
         });
+
+        // HVAC-specific conversion — fire an ADDITIONAL event when the call came in on the HVAC DID (8888139665)
+        if (did.replace(/[^0-9]/g, '').indexOf('8888139665') >= 0) {
+          const hvacEventId = `${eventId}-hv`;
+          console.log(`[moja-webhook] Firing HVAC_QualifiedCall for callId ${callId} (DID ${did})`);
+
+          const hvacResult = await sendConversionEvent({
+            eventName: 'HVAC_QualifiedCall',
+            eventId: hvacEventId,
+            clientIpAddress: clientIp,
+            customData: {
+              call_id: callId,
+              call_duration: duration,
+              caller_number: callerNumber,
+              did,
+              disposition,
+              source: 'moja',
+            },
+          });
+
+          if (prisma) {
+            await (prisma as any).conversionEvent?.create?.({
+              data: {
+                eventName: 'HVAC_QualifiedCall',
+                eventId: hvacEventId,
+                source: 'moja_webhook',
+                callId,
+                metaResponse: JSON.stringify(hvacResult?.response ?? {}),
+                success: hvacResult?.success ?? false,
+              },
+            }).catch((err: any) => {
+              console.error('[moja-webhook] HVAC conversion DB save error:', err?.message ?? err);
+            });
+          }
+        }
 
         if (prisma) {
           await (prisma as any).conversionEvent?.create?.({

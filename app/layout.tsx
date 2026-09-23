@@ -114,6 +114,32 @@ document.addEventListener('click', function(e) {
       keepalive: true
     });
   } catch(ex) {}
+
+  // HVAC-specific events — fire ADDITIONAL custom events when the CTA is on the /hvac page
+  // (all /hvac CTAs use data-cta-location values starting with "hvac_")
+  if (ctaLocation.toLowerCase().indexOf('hvac') >= 0) {
+    var hvacEventId = eventId + '-hv';
+
+    fbq('trackCustom', 'HVAC_Contact', { cta_location: ctaLocation }, { eventID: hvacEventId });
+    fbq('trackCustom', 'HVAC_InitiateCall', { cta_location: ctaLocation }, { eventID: hvacEventId });
+
+    try {
+      fetch('/api/meta-conversion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          eventName: 'HVAC_Contact',
+          eventId: hvacEventId,
+          ctaLocation: ctaLocation,
+          sourceUrl: window.location.href,
+          userAgent: navigator.userAgent,
+          fbc: ncGetCookie('_fbc'),
+          fbp: ncGetCookie('_fbp')
+        }),
+        keepalive: true
+      });
+    } catch(ex) {}
+  }
 }, true);
 `,
           }}
